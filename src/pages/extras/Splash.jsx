@@ -11,6 +11,7 @@ const Splash = () => {
     console.log(id);
     const decodedToken = decodeURIComponent(token);
     const encodedToken = encodeURIComponent(token);
+
     console.log("Token", token);
     console.log(decodedToken);
     console.log("Encoded", encodedToken);
