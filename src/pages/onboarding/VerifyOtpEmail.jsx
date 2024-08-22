@@ -40,10 +40,17 @@ const VerifyOtpEmail = () => {
               if (response?.data?.success) {
                 window.localStorage.setItem("token", response?.data?.token);
                 setSuccess("Email  Verified Successfully Successfully.");
-                api
-                  .post("/auth/sendPhoneOTP", {
-                    phoneNo: window.localStorage.getItem("phone"),
-                  })
+                const headers = {
+                  Authorization: `Bearer ${localStorage.getItem("token")}`,
+                };
+                axios
+                  .post(
+                    "/auth/sendPhoneOTP",
+                    {
+                      phoneNo: window.localStorage.getItem("phone"),
+                    },
+                    { headers }
+                  )
                   .then((response) => {
                     if (response?.data?.success) {
                       navigate("Verify Phone Otp", "/verify-otp-phone");
