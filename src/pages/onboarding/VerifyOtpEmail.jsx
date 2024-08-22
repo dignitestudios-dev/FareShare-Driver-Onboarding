@@ -8,10 +8,15 @@ import { verifyOtpValues } from "../../data/authentication";
 import { useFormik } from "formik";
 import authentication from "../../api/authenticationInterceptor";
 import Cookies from "js-cookie";
+import Error from "../../components/app/global/Error";
+import SuccessToast from "../../components/app/global/SuccessToast";
+import api from "../../api/apiInterceptor";
 
 const VerifyOtpEmail = () => {
   const { navigate, error, setError } = useContext(AppContext);
   const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+
   const { values, handleBlur, handleChange, handleSubmit, errors, touched } =
     useFormik({
       initialValues: verifyOtpValues,
@@ -31,6 +36,10 @@ const VerifyOtpEmail = () => {
           });
 
           if (response?.data?.success) {
+            setSuccess("Email  Verified Successfully Successfully.");
+            const response = await api.post("/auth/sendPhoneOTP", {
+              phoneNo: localStorage.getItem("phone"),
+            });
             localStorage.setItem("token", response?.data?.token);
             navigate("Verify Phone Otp", "/verify-otp-phone");
           }
@@ -42,10 +51,6 @@ const VerifyOtpEmail = () => {
         } finally {
           setLoading(false);
         }
-        setTimeout(() => {
-          navigate("Verify Phone Otp", "verify-otp-phone");
-          setLoading(false);
-        }, 2000);
       },
     });
 
@@ -113,14 +118,26 @@ const VerifyOtpEmail = () => {
     }
   };
 
-  // Add any custom logic here, e.g., validation or formatting
-  // For example, trimming whitespace:
-  // const trimmedValue = value.trim();
-
-  // formik.setFieldValue(name, trimmedValue);
-
-  // If you want to manually handle `touched`, you can set the field as touched
-  // formik.setFieldTouched(name, true, false);
+  // Resend OTP:
+  const [resendLoading, setResendLoading] = useState(false);
+  const resendOtp = async () => {
+    setResendLoading(true);
+    try {
+      const response = await authentication.post("/auth/sendOTP", {
+        email: localStorage.getItem("email"),
+      });
+      if (response?.data?.success) {
+        setResendLoading(false);
+        setSuccess("OTP Resend Successfully.");
+      }
+    } catch (error) {
+      // Handle errors (e.g., show error message)
+      setError(error?.response?.data?.message);
+      // console.error("Login failed:", error.response?.data);
+    } finally {
+      setResendLoading(false);
+    }
+  };
 
   return (
     <section className="bg-white">
@@ -134,7 +151,8 @@ const VerifyOtpEmail = () => {
             />
           </div>
         </div>
-
+        <Error error={error} setError={setError} />
+        <SuccessToast success={success} setSuccess={setSuccess} />
         <div className="flex items-center w-full max-w-3xl p-8 mx-auto lg:px-12 lg:w-1/2">
           <div className="w-full">
             <form onSubmit={handleSubmit} className="flex flex-col gap-6 mt-8">
@@ -282,8 +300,19 @@ const VerifyOtpEmail = () => {
                       </button>
                       <button
                         type="button"
-                        class="h-14 text-lg font-semibold w-full xl:w-[24rem] border-2 border-[#c00000] text-[#c00000] rounded-full transition-all duration-200 hover:bg-[#c00000] hover:text-white"
+                        onClick={resendOtp}
+                        disabled={resendLoading}
+                        class="h-14 text-lg font-semibold w-full xl:w-[24rem] border-2 border-[#c00000] text-[#c00000] rounded-full transition-all flex justify-center items-center gap-2 duration-200 hover:bg-[#c00000] hover:text-white"
                       >
+                        {resendLoading && (
+                          <div
+                            class="animate-spin inline-block size-6 border-[3px] border-current border-t-transparent text-white rounded-full"
+                            role="status"
+                            aria-label="loading"
+                          >
+                            <span class="sr-only">Loading...</span>
+                          </div>
+                        )}
                         Resend Code
                       </button>
                     </div>

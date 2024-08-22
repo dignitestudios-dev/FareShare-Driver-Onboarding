@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import {
   CardNumberElement,
   CardExpiryElement,
@@ -6,11 +6,13 @@ import {
   useStripe,
   useElements,
 } from "@stripe/react-stripe-js";
+import { AppContext } from "../../context/AppContext";
 
 const PaymentForm = () => {
   const stripe = useStripe();
   const elements = useElements();
-  const [error, setError] = useState(null);
+  const { navigate, error, setError } = useContext(AppContext);
+
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (event) => {

@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect } from "react";
 import {
   FaApple,
   FaArrowLeft,
@@ -22,48 +22,156 @@ import { ImProfile } from "react-icons/im";
 import { AiOutlinePlusCircle } from "react-icons/ai";
 import { GoPlus } from "react-icons/go";
 import { IoIosArrowRoundForward } from "react-icons/io";
+import { addVehicle } from "../../data/profile/addVehicle";
+import { vehicleSchema } from "../../schema/profile/addVehicleSchema";
+import api from "../../api/apiInterceptor";
+import { FaCircleCheck } from "react-icons/fa6";
 
 const AddVehicle = () => {
-  const { navigate, error, setError } = useContext(AppContext);
+  const { navigate, error, setError, isUploaded, setIsUploaded, vehicle_id } =
+    useContext(AppContext);
   const [loading, setLoading] = useState(false);
+
+  const [licenseFront, setLicenseFront] = useState(null);
+  const [licenseFrontBase, setLicenseFrontBase] = useState(null);
+  const handleLicenseFront = (e) => {
+    e.preventDefault();
+    document.getElementById("driverLicenseCardFront").click();
+  };
+
+  const handleLicenseFrontChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setLicenseFrontBase(reader.result);
+      };
+      reader.readAsDataURL(file);
+      setLicenseFront(file);
+    }
+  };
+
+  const [licenseBack, setLicenseBack] = useState(null);
+  const [licenseBackBase, setLicenseBackBase] = useState(null);
+  const handleLicenseBack = (e) => {
+    e.preventDefault();
+    document.getElementById("driverLicenseCardBack").click();
+  };
+
+  const handleLicenseBackChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setLicenseBackBase(reader.result);
+      };
+      reader.readAsDataURL(file);
+      setLicenseBack(file);
+    }
+  };
+
+  const [proof, setProof] = useState(null);
+  const [proofBase, setProofBase] = useState(null);
+  const handleProof = (e) => {
+    e.preventDefault();
+    document.getElementById("proofInsurance").click();
+  };
+
+  const handleProofChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProofBase(reader.result);
+      };
+      reader.readAsDataURL(file);
+      setProof(file);
+    }
+  };
+
+  const [registration, setRegistration] = useState(null);
+  const [registrationBase, setRegistrationBase] = useState(null);
+  const handleRegistration = (e) => {
+    e.preventDefault();
+    document.getElementById("vehicleRegistrationCard").click();
+  };
+
+  const handleRegistrationChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setRegistrationBase(reader.result);
+      };
+      reader.readAsDataURL(file);
+      setRegistration(file);
+    }
+  };
+
+  const formatDate = (val) => {
+    const date = new Date(val);
+
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0"); // Months are zero-based in JS
+    const day = String(date.getDate()).padStart(2, "0");
+
+    const formattedDate = `${year}-${month}-${day}`;
+    return formattedDate;
+  };
   const { values, handleBlur, handleChange, handleSubmit, errors, touched } =
     useFormik({
-      initialValues: signupValues,
-      validationSchema: signupSchema,
+      initialValues: addVehicle,
+      validationSchema: vehicleSchema,
       validateOnChange: true,
       validateOnBlur: false,
 
       onSubmit: async (values, action) => {
         setLoading(true);
-        // try {
-        //   // API call to login using Axios interceptor
-        //   const response = await authentication.post("/auth/brokerSignIn", {
-        //     email: values.email,
-        //     password: values.password,
-        //   });
 
-        //   if (response?.status == 200 && response?.data?.token !== null) {
-        //     localStorage.setItem("token", response?.data?.token);
-        //     localStorage.setItem(
-        //       "broker",
-        //       JSON.stringify(response?.data?.data)
-        //     );
-        //     navigate("Home", "/home");
-        //   }
-        // } catch (error) {
-        //   console.log(error);
-        //   // Handle errors (e.g., show error message)
-        //   setError(error?.response?.data?.message);
-        // } finally {
-        //   // console.error("Login failed:", error.response?.data);
-        //   setLoading(false);
-        // }
-        setTimeout(() => {
-          navigate("Verify Email Otp", "verify-otp-email");
+        try {
+          const formdata = new FormData();
+
+          formdata.append("vehicleName", values.vehicleName);
+          formdata.append("vehicleMake", values.vehicleMake);
+          formdata.append("modelYear", values.modelYear);
+          formdata.append("plateNumber", values.plateNumber);
+          formdata.append(
+            "isWheelChairAccessible",
+            values.isWheelChairAccessible
+          );
+          formdata.append("driverLicenseCardFront", licenseFront);
+          formdata.append("driverLicenseCardBack", licenseBack);
+
+          formdata.append(
+            "driverLicenseExpiryDate",
+            formatDate(values.driverLicenseExpiryDate)
+          );
+          formdata.append(
+            "vehicleRegistrationExpiryDate",
+            formatDate(values.vehicleRegistrationExpiryDate)
+          );
+
+          formdata.append(
+            "proofInsuranceExpiryDate",
+            formatDate(values.proofInsuranceExpiryDate)
+          );
+
+          formdata.append("proofInsurance", proof);
+          formdata.append("vehicleRegistrationCard", registration);
+          formdata.append("vehicleId", vehicle_id);
+
+          const response = await api.post("/driver/completeVehicle", formdata);
+          if (response?.data?.success) {
+            navigate("Awaiting Approval", "/awaiting-approval");
+          }
+        } catch (error) {
+          setError(error?.response?.data?.message);
+        } finally {
           setLoading(false);
-        }, 2000);
+        }
       },
     });
+
   return (
     <section class="bg-white ">
       <div class="flex justify-center min-h-screen">
@@ -106,12 +214,27 @@ const AddVehicle = () => {
                     }
                     className="w-full h-[136px] rounded-2xl bg-gray-50 border border-gray-200 text-[#c00000] flex gap-1 flex-col justify-center items-center text-2xl font-medium"
                   >
-                    <GoPlus />
+                    <GoPlus
+                      className={`${
+                        isUploaded ? "text-green-500" : "text-[#c00000]"
+                      }`}
+                    />
                     <div className="w-auto flex justify-center items-center gap-1">
-                      <span className="text-xs  text-[#000] font-semibold">
-                        Upload Vehicle Images
-                      </span>
-                      <IoIosArrowRoundForward className="text-md text-black" />
+                      {isUploaded ? (
+                        <>
+                          <FaCircleCheck className="text-green-500" />
+                          <span className="text-[12px] underline underline-offset-2 font-bold text-green-500">
+                            Document Added
+                          </span>
+                        </>
+                      ) : (
+                        <>
+                          <span className="text-xs  text-[#000] font-semibold">
+                            Upload Vehicle Images
+                          </span>
+                          <IoIosArrowRoundForward className="text-md text-black" />
+                        </>
+                      )}
                     </div>
                   </button>
                 </div>
@@ -122,71 +245,71 @@ const AddVehicle = () => {
                   </label>
                   <input
                     type="text"
-                    id="email"
-                    name="email"
-                    value={values.email}
+                    id="vehicleMake"
+                    name="vehicleMake"
+                    value={values.vehicleMake}
                     onChange={handleChange}
                     onBlur={handleBlur}
                     placeholder="Toyotta"
                     class={`block w-full px-5 py-3 bg-gray-50  text-gray-700 placeholder-gray-400  border border-gray-200 rounded-2xl   focus:border-[#c00000]  focus:ring-[#c00000] focus:outline-none focus:ring focus:ring-opacity-40 transition-colors duration-300 ${
-                      errors.email && touched.email
+                      errors.vehicleMake && touched.vehicleMake
                         ? "border-red-600 shake"
                         : null
                     }`}
                   />
-                  {errors.email && touched.email ? (
+                  {errors.vehicleMake && touched.vehicleMake ? (
                     <p className="text-red-700 text-sm font-medium">
-                      {errors.email}
+                      {errors.vehicleMake}
                     </p>
                   ) : null}
                 </div>
 
                 <div>
                   <label class="block mb-1 text-sm text-gray-500 font-medium ml-1 ">
-                    Name
+                    Model
                   </label>
                   <input
                     type="text"
-                    id="email"
-                    name="email"
-                    value={values.email}
+                    id="vehicleName"
+                    name="vehicleName"
+                    value={values.vehicleName}
                     onChange={handleChange}
                     onBlur={handleBlur}
                     placeholder="John Doe"
                     class={`block w-full px-5 py-3  text-gray-700 placeholder-gray-400 bg-gray-50 border border-gray-200 rounded-2xl   focus:border-[#c00000]  focus:ring-[#c00000] focus:outline-none focus:ring focus:ring-opacity-40 transition-colors duration-300 ${
-                      errors.email && touched.email
+                      errors.vehicleName && touched.vehicleName
                         ? "border-red-600 shake"
                         : null
                     }`}
                   />
-                  {errors.email && touched.email ? (
+                  {errors.vehicleName && touched.vehicleName ? (
                     <p className="text-red-700 text-sm font-medium">
-                      {errors.email}
+                      {errors.vehicleName}
                     </p>
                   ) : null}
                 </div>
 
                 <div>
                   <label class="block mb-1 text-sm text-gray-500 font-medium ml-1 ">
-                    Model/Year
+                    Year
                   </label>
                   <input
                     type="text"
-                    id="email"
-                    name="email"
-                    value={values.email}
+                    id="modelYear"
+                    name="modelYear"
+                    value={values.modelYear}
                     onChange={handleChange}
                     onBlur={handleBlur}
                     placeholder="Corolla/2024"
                     class={`block w-full px-5 py-3  text-gray-700 placeholder-gray-400 bg-gray-50 border border-gray-200 rounded-2xl   focus:border-[#c00000]  focus:ring-[#c00000] focus:outline-none focus:ring focus:ring-opacity-40 transition-colors duration-300 ${
-                      errors.email && touched.email
+                      errors.modelYear && touched.modelYear
                         ? "border-red-600 shake"
                         : null
                     }`}
                   />
-                  {errors.email && touched.email ? (
+                  {errors.modelYear && touched.modelYear ? (
                     <p className="text-red-700 text-sm font-medium">
-                      {errors.email}
+                      {errors.modelYear}
                     </p>
                   ) : null}
                 </div>
@@ -197,30 +320,34 @@ const AddVehicle = () => {
                   </label>
                   <input
                     type="text"
-                    id="email"
-                    name="email"
-                    value={values.email}
+                    id="plateNumber"
+                    name="plateNumber"
+                    value={values.plateNumber}
                     onChange={handleChange}
                     onBlur={handleBlur}
                     placeholder="XXX-XXXX"
                     class={`block w-full px-5 py-3  text-gray-700 placeholder-gray-400 bg-gray-50 border border-gray-200 rounded-2xl   focus:border-[#c00000]  focus:ring-[#c00000] focus:outline-none focus:ring focus:ring-opacity-40 transition-colors duration-300 ${
-                      errors.email && touched.email
+                      errors.plateNumber && touched.plateNumber
                         ? "border-red-600 shake"
                         : null
                     }`}
                   />
-                  {errors.email && touched.email ? (
+                  {errors.plateNumber && touched.plateNumber ? (
                     <p className="text-red-700 text-sm font-medium">
-                      {errors.email}
+                      {errors.plateNumber}
                     </p>
                   ) : null}
                 </div>
 
                 <div class="flex items-center">
                   <input
-                    id="checked-checkbox"
+                    id="isWheelChairAccessible"
                     type="checkbox"
-                    value=""
+                    name="isWheelChairAccessible"
+                    value={values.isWheelChairAccessible}
+                    maxLength={12}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
                     class="w-3 h-3 text-[#c00000] bg-gray-100 border-gray-300 rounded focus:ring-[#c00000] accent-[#c00000]  focus:ring-2"
                   />
                   <label
@@ -231,161 +358,300 @@ const AddVehicle = () => {
                   </label>
                 </div>
                 <div className="w-full grid grid-cols-2 gap-2">
-                  <div className="h-[139px] rounded-2xl border border-gray-200 bg-gray-50 p-3 w-full flex flex-col gap-2 justify-center items-center">
+                  <div className="w-full h-auto flex flex-col justify-start items-start gap-1">
+                    <div className="h-[139px] rounded-2xl border border-gray-200 bg-gray-50 p-3 w-full flex flex-col gap-2 justify-center items-center">
+                      <div className="w-full flex items-center justify-center gap-1">
+                        <span className="w-6 h-6 rounded-full bg-[#c00000] text-white flex items-center justify-center text-xs">
+                          <ImProfile />
+                        </span>
+                        <span className="text-[13.5px] font-bold text-black">
+                          Driver's License
+                        </span>
+                      </div>
+                      <span className="text-[12px] font-[510] text-black">
+                        Front
+                      </span>
+
+                      <button
+                        onClick={handleLicenseFront}
+                        className="w-full flex items-center justify-center gap-2 text-black"
+                      >
+                        {licenseFrontBase ? (
+                          <>
+                            <FaCircleCheck className="text-green-500" />
+                            <span className="text-[12px] underline underline-offset-2 font-bold text-green-500">
+                              Document Added
+                            </span>
+                          </>
+                        ) : (
+                          <>
+                            <AiOutlinePlusCircle />
+                            <span className="text-[12px] underline underline-offset-2 font-bold text-black">
+                              Add Documents
+                            </span>
+                          </>
+                        )}
+                      </button>
+                      <input
+                        type="file"
+                        id="driverLicenseCardFront"
+                        name="driverLicenseCardFront"
+                        accept="image/*"
+                        className="hidden"
+                        onBlur={handleBlur}
+                        onChange={(e) => {
+                          handleLicenseFrontChange(e);
+                          handleChange(e);
+                        }}
+                      />
+                    </div>
+                    {errors.driverLicenseCardFront &&
+                    touched.driverLicenseCardFront ? (
+                      <p className="text-red-700 text-sm ml-1 font-medium">
+                        {errors.driverLicenseCardFront}
+                      </p>
+                    ) : null}
+                  </div>
+                  <div className="w-full h-auto flex flex-col gap-1 justify-start items-start">
+                    <div className="h-[139px] rounded-2xl border  border-gray-200 bg-gray-50 p-3 w-full flex flex-col gap-2 justify-center items-center">
+                      <div className="w-full flex items-center justify-center gap-1">
+                        <span className="w-6 h-6 rounded-full bg-[#c00000] text-white flex items-center justify-center text-xs">
+                          <ImProfile />
+                        </span>
+                        <span className="text-[13.5px] font-bold text-black">
+                          Driver's License
+                        </span>
+                      </div>
+                      <span className="text-[12px] font-[510] text-black">
+                        Back
+                      </span>
+
+                      <buttton
+                        onClick={handleLicenseBack}
+                        className="w-full flex items-center justify-center gap-2 text-black"
+                      >
+                        {licenseBackBase ? (
+                          <>
+                            <FaCircleCheck className="text-green-500" />
+                            <span className="text-[12px] underline underline-offset-2 font-bold text-green-500">
+                              Document Added
+                            </span>
+                          </>
+                        ) : (
+                          <>
+                            <AiOutlinePlusCircle />
+                            <span className="text-[12px] underline underline-offset-2 font-bold text-black">
+                              Add Documents
+                            </span>
+                          </>
+                        )}
+                      </buttton>
+                      <input
+                        type="file"
+                        id="driverLicenseCardBack"
+                        name="driverLicenseCardBack"
+                        accept="image/*"
+                        className="hidden"
+                        onBlur={handleBlur}
+                        onChange={(e) => {
+                          handleLicenseBackChange(e);
+                          handleChange(e);
+                        }}
+                      />
+                    </div>
+                    {errors.driverLicenseCardBack &&
+                    touched.driverLicenseCardBack ? (
+                      <p className="text-red-700 text-sm ml-1 font-medium">
+                        {errors.driverLicenseCardBack}
+                      </p>
+                    ) : null}
+                  </div>
+                </div>
+
+                <div>
+                  <label class="block mb-1 text-sm text-gray-500 font-medium ml-1 ">
+                    Expiration Date
+                  </label>
+                  <input
+                    type="date"
+                    id="driverLicenseExpiryDate"
+                    name="driverLicenseExpiryDate"
+                    value={values.driverLicenseExpiryDate}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    placeholder="johnsnow@example.com"
+                    class={`block w-full px-5 py-3  text-gray-700 placeholder-gray-400 bg-gray-50 border border-gray-200 rounded-2xl   focus:border-[#c00000]  focus:ring-[#c00000] focus:outline-none focus:ring focus:ring-opacity-40 transition-colors duration-300 ${
+                      errors.driverLicenseExpiryDate &&
+                      touched.driverLicenseExpiryDate
+                        ? "border-red-600 shake"
+                        : null
+                    }`}
+                  />
+                  {errors.driverLicenseExpiryDate &&
+                  touched.driverLicenseExpiryDate ? (
+                    <p className="text-red-700 text-sm font-medium">
+                      {errors.driverLicenseExpiryDate}
+                    </p>
+                  ) : null}
+                </div>
+                <div className="w-full h-auto flex flex-col gap-1 justify-start items-start">
+                  <div className="h-[139px] bg-gray-50 rounded-2xl border border-gray-200 p-3 w-full flex flex-col gap-2 justify-center items-center">
                     <div className="w-full flex items-center justify-center gap-1">
                       <span className="w-6 h-6 rounded-full bg-[#c00000] text-white flex items-center justify-center text-xs">
                         <ImProfile />
                       </span>
                       <span className="text-[13.5px] font-bold text-black">
-                        Driver's License
+                        Proof Insurance
                       </span>
                     </div>
                     <span className="text-[12px] font-[510] text-black">
-                      Front
+                      Upload proof insurance
                     </span>
 
-                    <div className="w-full flex items-center justify-center gap-2 text-black">
-                      <AiOutlinePlusCircle />
-                      <span className="text-[12px] underline underline-offset-2 font-bold text-black">
-                        Add Documents
-                      </span>
-                    </div>
+                    <button
+                      onClick={handleProof}
+                      className="w-full flex items-center justify-center gap-2 text-black"
+                    >
+                      {proofBase ? (
+                        <>
+                          <FaCircleCheck className="text-green-500" />
+                          <span className="text-[12px] underline underline-offset-2 font-bold text-green-500">
+                            Document Added
+                          </span>
+                        </>
+                      ) : (
+                        <>
+                          <AiOutlinePlusCircle />
+                          <span className="text-[12px] underline underline-offset-2 font-bold text-black">
+                            Add Documents
+                          </span>
+                        </>
+                      )}
+                    </button>
+                    <input
+                      type="file"
+                      id="proofInsurance"
+                      name="proofInsurance"
+                      accept="image/*"
+                      className="hidden"
+                      onBlur={handleBlur}
+                      onChange={(e) => {
+                        handleProofChange(e);
+                        handleChange(e);
+                      }}
+                    />
                   </div>
-                  <div className="h-[139px] rounded-2xl border  border-gray-200 bg-gray-50 p-3 w-full flex flex-col gap-2 justify-center items-center">
+                  {errors.proofInsurance && touched.proofInsurance ? (
+                    <p className="text-red-700 text-sm ml-1 font-medium">
+                      {errors.proofInsurance}
+                    </p>
+                  ) : null}
+                </div>
+                <div>
+                  <label class="block mb-1 text-sm text-gray-500 font-medium ml-1 ">
+                    Expiration Date
+                  </label>
+                  <input
+                    type="date"
+                    id="proofInsuranceExpiryDate"
+                    name="proofInsuranceExpiryDate"
+                    value={values.proofInsuranceExpiryDate}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    placeholder="johnsnow@example.com"
+                    class={`block w-full px-5 py-3  text-gray-700 placeholder-gray-400 bg-gray-50 border border-gray-200 rounded-2xl   focus:border-[#c00000]  focus:ring-[#c00000] focus:outline-none focus:ring focus:ring-opacity-40 transition-colors duration-300 ${
+                      errors.proofInsuranceExpiryDate &&
+                      touched.proofInsuranceExpiryDate
+                        ? "border-red-600 shake"
+                        : null
+                    }`}
+                  />
+                  {errors.proofInsuranceExpiryDate &&
+                  touched.proofInsuranceExpiryDate ? (
+                    <p className="text-red-700 text-sm font-medium">
+                      {errors.proofInsuranceExpiryDate}
+                    </p>
+                  ) : null}
+                </div>
+                <div className="w-full h-auto flex flex-col gap-1 justify-start items-start">
+                  <div className="h-[139px] rounded-2xl bg-gray-50 border border-gray-200 p-3 w-full flex flex-col gap-2 justify-center items-center">
                     <div className="w-full flex items-center justify-center gap-1">
                       <span className="w-6 h-6 rounded-full bg-[#c00000] text-white flex items-center justify-center text-xs">
                         <ImProfile />
                       </span>
                       <span className="text-[13.5px] font-bold text-black">
-                        Driver's License
+                        Registration
                       </span>
                     </div>
                     <span className="text-[12px] font-[510] text-black">
-                      Back
+                      Upload proof of vehicle’s registrations
                     </span>
 
-                    <div className="w-full flex items-center justify-center gap-2 text-black">
-                      <AiOutlinePlusCircle />
-                      <span className="text-[12px] underline underline-offset-2 font-bold text-black">
-                        Add Documents
-                      </span>
-                    </div>
-                  </div>
-                </div>
+                    <button
+                      onClick={handleRegistration}
+                      className="w-full flex items-center justify-center gap-2 text-black"
+                    >
+                      {registration ? (
+                        <>
+                          <FaCircleCheck className="text-green-500" />
+                          <span className="text-[12px] underline underline-offset-2 font-bold text-green-500">
+                            Document Added
+                          </span>
+                        </>
+                      ) : (
+                        <>
+                          <AiOutlinePlusCircle />
+                          <span className="text-[12px] underline underline-offset-2 font-bold text-black">
+                            Add Documents
+                          </span>
+                        </>
+                      )}
+                    </button>
 
-                <div>
-                  <label class="block mb-1 text-sm text-gray-500 font-medium ml-1 ">
-                    Expiration Date
-                  </label>
-                  <input
-                    type="date"
-                    id="email"
-                    name="email"
-                    value={values.email}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    placeholder="johnsnow@example.com"
-                    class={`block w-full px-5 py-3  text-gray-700 placeholder-gray-400 bg-gray-50 border border-gray-200 rounded-2xl   focus:border-[#c00000]  focus:ring-[#c00000] focus:outline-none focus:ring focus:ring-opacity-40 transition-colors duration-300 ${
-                      errors.email && touched.email
-                        ? "border-red-600 shake"
-                        : null
-                    }`}
-                  />
-                  {errors.email && touched.email ? (
-                    <p className="text-red-700 text-sm font-medium">
-                      {errors.email}
+                    <input
+                      type="file"
+                      id="vehicleRegistrationCard"
+                      name="vehicleRegistrationCard"
+                      accept="image/*"
+                      className="hidden"
+                      onBlur={handleBlur}
+                      onChange={(e) => {
+                        handleRegistrationChange(e);
+                        handleChange(e);
+                      }}
+                    />
+                  </div>
+                  {errors.vehicleRegistrationCard &&
+                  touched.vehicleRegistrationCard ? (
+                    <p className="text-red-700 text-sm ml-1 font-medium">
+                      {errors.vehicleRegistrationCard}
                     </p>
                   ) : null}
                 </div>
 
-                <div className="h-[139px] bg-gray-50 rounded-2xl border border-gray-200 p-3 w-full flex flex-col gap-2 justify-center items-center">
-                  <div className="w-full flex items-center justify-center gap-1">
-                    <span className="w-6 h-6 rounded-full bg-[#c00000] text-white flex items-center justify-center text-xs">
-                      <ImProfile />
-                    </span>
-                    <span className="text-[13.5px] font-bold text-black">
-                      Proof Insurance
-                    </span>
-                  </div>
-                  <span className="text-[12px] font-[510] text-black">
-                    Upload proof insurance
-                  </span>
-
-                  <div className="w-full flex items-center justify-center gap-2 text-black">
-                    <AiOutlinePlusCircle />
-                    <span className="text-[12px] underline underline-offset-2 font-bold text-black">
-                      Add Documents
-                    </span>
-                  </div>
-                </div>
-
                 <div>
                   <label class="block mb-1 text-sm text-gray-500 font-medium ml-1 ">
                     Expiration Date
                   </label>
                   <input
                     type="date"
-                    id="email"
-                    name="email"
-                    value={values.email}
+                    id="vehicleRegistrationExpiryDate"
+                    name="vehicleRegistrationExpiryDate"
+                    value={values.vehicleRegistrationExpiryDate}
                     onChange={handleChange}
                     onBlur={handleBlur}
                     placeholder="johnsnow@example.com"
                     class={`block w-full px-5 py-3  text-gray-700 placeholder-gray-400 bg-gray-50 border border-gray-200 rounded-2xl   focus:border-[#c00000]  focus:ring-[#c00000] focus:outline-none focus:ring focus:ring-opacity-40 transition-colors duration-300 ${
-                      errors.email && touched.email
+                      errors.vehicleRegistrationExpiryDate &&
+                      touched.vehicleRegistrationExpiryDate
                         ? "border-red-600 shake"
                         : null
                     }`}
                   />
-                  {errors.email && touched.email ? (
+                  {errors.vehicleRegistrationExpiryDate &&
+                  touched.vehicleRegistrationExpiryDate ? (
                     <p className="text-red-700 text-sm font-medium">
-                      {errors.email}
-                    </p>
-                  ) : null}
-                </div>
-
-                <div className="h-[139px] rounded-2xl bg-gray-50 border border-gray-200 p-3 w-full flex flex-col gap-2 justify-center items-center">
-                  <div className="w-full flex items-center justify-center gap-1">
-                    <span className="w-6 h-6 rounded-full bg-[#c00000] text-white flex items-center justify-center text-xs">
-                      <ImProfile />
-                    </span>
-                    <span className="text-[13.5px] font-bold text-black">
-                      Registration
-                    </span>
-                  </div>
-                  <span className="text-[12px] font-[510] text-black">
-                    Upload proof of vehicle’s registrations
-                  </span>
-
-                  <div className="w-full flex items-center justify-center gap-2 text-black">
-                    <AiOutlinePlusCircle />
-                    <span className="text-[12px] underline underline-offset-2 font-bold text-black">
-                      Add Documents
-                    </span>
-                  </div>
-                </div>
-
-                <div>
-                  <label class="block mb-1 text-sm text-gray-500 font-medium ml-1 ">
-                    Expiration Date
-                  </label>
-                  <input
-                    type="date"
-                    id="email"
-                    name="email"
-                    value={values.email}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    placeholder="johnsnow@example.com"
-                    class={`block w-full px-5 py-3  text-gray-700 placeholder-gray-400 bg-gray-50 border border-gray-200 rounded-2xl   focus:border-[#c00000]  focus:ring-[#c00000] focus:outline-none focus:ring focus:ring-opacity-40 transition-colors duration-300 ${
-                      errors.email && touched.email
-                        ? "border-red-600 shake"
-                        : null
-                    }`}
-                  />
-                  {errors.email && touched.email ? (
-                    <p className="text-red-700 text-sm font-medium">
-                      {errors.email}
+                      {errors.vehicleRegistrationExpiryDate}
                     </p>
                   ) : null}
                 </div>
@@ -393,7 +659,7 @@ const AddVehicle = () => {
 
               <button
                 type="submit"
-                disabled={loading}
+                // disabled={loading}
                 class="flex items-center justify-center gap-4 w-full  px-6 py-3 text-sm tracking-wide text-white capitalize transition-colors duration-300 transform bg-[#c00000] rounded-full hover:bg-[#c00000] focus:outline-none focus:ring focus:ring-red-300 focus:ring-opacity-50"
               >
                 {loading && (

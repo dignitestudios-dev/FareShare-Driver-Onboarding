@@ -24,6 +24,9 @@ export const AppContextProvider = ({ children }) => {
 
   // Global Error State
   const [error, setError] = useState(false);
+  const [isUploaded, setIsUploaded] = useState(false);
+  const [isSocialLogin, setIsSocialLogin] = useState(false);
+  const [vehicle_id, setVehicle_id] = useState(null);
 
   return (
     <AppContext.Provider
@@ -39,6 +42,12 @@ export const AppContextProvider = ({ children }) => {
         setError,
         requestOpen,
         setRequestOpen,
+        isUploaded,
+        setIsUploaded,
+        isSocialLogin,
+        setIsSocialLogin,
+        vehicle_id,
+        setVehicle_id,
       }}
     >
       {children}

@@ -1,84 +1,111 @@
-import React, { useContext } from "react";
-import {
-  FaApple,
-  FaArrowLeft,
-  FaArrowRight,
-  FaFacebook,
-  FaFacebookF,
-} from "react-icons/fa";
-import { FiUser } from "react-icons/fi";
-import { TiUserAddOutline } from "react-icons/ti";
+import React, { useContext, useEffect, useState } from "react";
+import { FaArrowLeft } from "react-icons/fa";
+import { GoPlus } from "react-icons/go";
 import { AppContext } from "../../context/AppContext";
 import { useFormik } from "formik";
-import Cookies from "js-cookie";
-import authentication from "../../api/authenticationInterceptor";
-import { useState } from "react";
-import Error from "../../components/app/global/Error";
-import axios from "axios";
-import { signupSchema } from "../../schema/signupSchema";
-import { signupValues } from "../../data/authentication";
 import { Link } from "react-router-dom";
-import { ImProfile } from "react-icons/im";
-import { AiOutlinePlusCircle } from "react-icons/ai";
-import { GoPlus } from "react-icons/go";
-import { IoIosArrowRoundForward } from "react-icons/io";
+import { vehicleImagesValues } from "../../data/profile/vehicleImages";
+import { vehicleImagesSchema } from "../../schema/profile/vehicleImagesSchema";
+import Error from "../../components/app/global/Error";
+import api from "../../api/apiInterceptor";
 
 const UploadVehicleImages = () => {
-  const { navigate, error, setError } = useContext(AppContext);
+  const { navigate, error, setError, setIsUploaded, setVehicle_id } =
+    useContext(AppContext);
   const [loading, setLoading] = useState(false);
-  const { values, handleBlur, handleChange, handleSubmit, errors, touched } =
-    useFormik({
-      initialValues: signupValues,
-      validationSchema: signupSchema,
-      validateOnChange: true,
-      validateOnBlur: false,
+  const [imagePreviews, setImagePreviews] = useState({
+    vehicleImageFront: null,
+    vehicleImageRear: null,
+    vehicleImagePassengerSide: null,
+    vehicleImageDriverSide: null,
+    vehicleImageInteriorFront: null,
+    vehicleImageInteriorBack: null,
+  });
 
-      onSubmit: async (values, action) => {
+  const [imageFiles, setImageFiles] = useState({
+    vehicleImageFront: null,
+    vehicleImageRear: null,
+    vehicleImagePassengerSide: null,
+    vehicleImageDriverSide: null,
+    vehicleImageInteriorFront: null,
+    vehicleImageInteriorBack: null,
+  });
+
+  // Handle image changes, previews, and files
+  const handleImageChange = (e, key) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreviews((prev) => ({ ...prev, [key]: reader.result }));
+      };
+      setImageFiles((prev) => ({ ...prev, [key]: file }));
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // Initialize formik for form handling
+  const { handleBlur, handleChange, handleSubmit, errors, touched } = useFormik(
+    {
+      initialValues: vehicleImagesValues,
+      validationSchema: vehicleImagesSchema,
+      onSubmit: async (values) => {
         setLoading(true);
-        // try {
-        //   // API call to login using Axios interceptor
-        //   const response = await authentication.post("/auth/brokerSignIn", {
-        //     email: values.email,
-        //     password: values.password,
-        //   });
 
-        //   if (response?.status == 200 && response?.data?.token !== null) {
-        //     localStorage.setItem("token", response?.data?.token);
-        //     localStorage.setItem(
-        //       "broker",
-        //       JSON.stringify(response?.data?.data)
-        //     );
-        //     navigate("Home", "/home");
-        //   }
-        // } catch (error) {
-        //   console.log(error);
-        //   // Handle errors (e.g., show error message)
-        //   setError(error?.response?.data?.message);
-        // } finally {
-        //   // console.error("Login failed:", error.response?.data);
-        //   setLoading(false);
-        // }
-        setTimeout(() => {
-          navigate("Verify Email Otp", "verify-otp-email");
+        const formdata = new FormData();
+        formdata.append("vehicleImageFront", imageFiles.vehicleImageFront);
+        formdata.append("vehicleImageRear", imageFiles.vehicleImageRear);
+        formdata.append(
+          "vehicleImagePassengerSide",
+          imageFiles.vehicleImagePassengerSide
+        );
+        formdata.append(
+          "vehicleImageDriverSide",
+          imageFiles.vehicleImageDriverSide
+        );
+        formdata.append(
+          "vehicleImageInteriorFront",
+          imageFiles.vehicleImageInteriorFront
+        );
+        formdata.append(
+          "vehicleImageInteriorBack",
+          imageFiles.vehicleImageInteriorBack
+        );
+
+        try {
+          const response = await api.post(
+            "driver/completeVehicleDocs",
+            formdata
+          );
+          if (response.data.success) {
+            setIsUploaded(true);
+            setVehicle_id(response?.data?.data?.vehicle?.id);
+            navigate("Add Vehicle", "/add-vehicle");
+          }
+        } catch (error) {
+          setError(error.response.data.message);
+        } finally {
           setLoading(false);
-        }, 2000);
+        }
       },
-    });
+    }
+  );
+
   return (
-    <section class="bg-white ">
-      <div class="flex justify-center min-h-screen">
-        <div class="hidden  h-screen lg:flex justify-center items-center bg-cover  lg:w-2/5">
-          <div class="w-full h-full  flex items-center justify-center animate one text-4xl font-bold text-[#c00000]">
+    <section className="bg-white">
+      <div className="flex justify-center min-h-screen">
+        <div className="hidden lg:flex h-screen justify-center items-center bg-cover lg:w-2/5">
+          <div className="w-full h-full flex items-center justify-center">
             <img
               src="https://fareshare.vercel.app/assets/fareshare_logo-15fzbzBE.svg"
-              alt=""
+              alt="Logo"
               className="w-[70%]"
             />
           </div>
         </div>
 
-        <div class="flex items-center  w-full max-w-3xl p-6 mx-auto lg:px-12 lg:w-3/5">
-          <div class="w-full">
+        <div className="flex items-center w-full max-w-3xl p-6 mx-auto lg:px-12 lg:w-3/5">
+          <div className="w-full">
             <Error error={error} setError={setError} />
 
             <div className="w-full flex justify-center items-center">
@@ -88,127 +115,93 @@ const UploadVehicleImages = () => {
               >
                 <FaArrowLeft />
               </Link>
-              <h1 class="text-[17px] mr-auto lg:text-[24px] font-semibold text-center tracking-tight text-gray-800 capitalize ">
-                Upload vehicle images{" "}
+              <h1 className="text-[17px] lg:text-[24px] font-semibold text-center text-gray-800">
+                Upload vehicle images
               </h1>
             </div>
 
             <form
               onSubmit={handleSubmit}
-              class="w-full flex flex-col gap-6 mt-8 "
+              className="w-full flex flex-col gap-6 mt-8"
             >
-              <div className="w-full flex flex-col  gap-4 ">
-                <div className="w-full flex flex-col gap-1 justify-center items-center">
+              {[
+                "vehicleImageFront",
+                "vehicleImageRear",
+                "vehicleImagePassengerSide",
+                "vehicleImageDriverSide",
+                "vehicleImageInteriorFront",
+                "vehicleImageInteriorBack",
+              ].map((imageKey) => (
+                <div
+                  key={imageKey}
+                  className="w-full flex flex-col gap-1 justify-center items-center"
+                >
                   <button
                     type="button"
+                    onClick={() => document.getElementById(imageKey).click()}
                     className="w-full h-[136px] bg-gray-50 rounded-2xl border border-dashed border-[#c00000] text-[#c00000] flex gap-1 flex-col justify-center items-center text-2xl font-medium"
                   >
-                    <GoPlus />
-                    <div className="w-auto flex justify-center items-center gap-1">
-                      <span className="text-xs  text-[#000] font-semibold">
-                        Front
-                      </span>
-                    </div>
+                    {imagePreviews[imageKey] ? (
+                      <img
+                        src={imagePreviews[imageKey]}
+                        className="w-full h-full rounded-2xl"
+                      />
+                    ) : (
+                      <>
+                        <GoPlus />
+                        <span className="text-xs text-[#000] font-semibold">
+                          {imageKey
+                            .replace("vehicleImage", "")
+                            .replace(/([A-Z])/g, " $1")}
+                        </span>
+                      </>
+                    )}
                   </button>
+                  <input
+                    type="file"
+                    id={imageKey}
+                    name={imageKey}
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      handleImageChange(e, imageKey);
+                      handleChange(e);
+                    }}
+                    onBlur={handleBlur}
+                  />
+                  {errors[imageKey] && touched[imageKey] && (
+                    <p className="text-red-700 text-sm ml-1 font-medium">
+                      {errors[imageKey]}
+                    </p>
+                  )}
                 </div>
-
-                <div className="w-full flex flex-col gap-1 justify-center items-center">
-                  <button
-                    type="button"
-                    className="w-full h-[136px] bg-gray-50 rounded-2xl border border-dashed border-[#c00000] text-[#c00000] flex gap-1 flex-col justify-center items-center text-2xl font-medium"
-                  >
-                    <GoPlus />
-                    <div className="w-auto flex justify-center items-center gap-1">
-                      <span className="text-xs  text-[#000] font-semibold">
-                        Rear
-                      </span>
-                    </div>
-                  </button>
-                </div>
-
-                <div className="w-full flex flex-col gap-1 justify-center items-center">
-                  <button
-                    type="button"
-                    className="w-full h-[136px] bg-gray-50 rounded-2xl border border-dashed border-[#c00000] text-[#c00000] flex gap-1 flex-col justify-center items-center text-2xl font-medium"
-                  >
-                    <GoPlus />
-                    <div className="w-auto flex justify-center items-center gap-1">
-                      <span className="text-xs  text-[#000] font-semibold">
-                        Passenger Side
-                      </span>
-                    </div>
-                  </button>
-                </div>
-
-                <div className="w-full flex flex-col gap-1 justify-center items-center">
-                  <button
-                    type="button"
-                    className="w-full h-[136px] bg-gray-50 rounded-2xl border border-dashed border-[#c00000] text-[#c00000] flex gap-1 flex-col justify-center items-center text-2xl font-medium"
-                  >
-                    <GoPlus />
-                    <div className="w-auto flex justify-center items-center gap-1">
-                      <span className="text-xs  text-[#000] font-semibold">
-                        Driver Side
-                      </span>
-                    </div>
-                  </button>
-                </div>
-
-                <div className="w-full flex flex-col gap-1 justify-center items-center">
-                  <button
-                    type="button"
-                    className="w-full h-[136px] bg-gray-50 rounded-2xl border border-dashed border-[#c00000] text-[#c00000] flex gap-1 flex-col justify-center items-center text-2xl font-medium"
-                  >
-                    <GoPlus />
-                    <div className="w-auto flex justify-center items-center gap-1">
-                      <span className="text-xs  text-[#000] font-semibold">
-                        Interior Front
-                      </span>
-                    </div>
-                  </button>
-                </div>
-
-                <div className="w-full flex flex-col gap-1 justify-center items-center">
-                  <button
-                    type="button"
-                    className="w-full h-[136px] bg-gray-50 rounded-2xl border border-dashed border-[#c00000] text-[#c00000] flex gap-1 flex-col justify-center items-center text-2xl font-medium"
-                  >
-                    <GoPlus />
-                    <div className="w-auto flex justify-center items-center gap-1">
-                      <span className="text-xs  text-[#000] font-semibold">
-                        Interior Back
-                      </span>
-                    </div>
-                  </button>
-                </div>
-              </div>
+              ))}
 
               <button
                 type="submit"
                 disabled={loading}
-                class="flex items-center justify-center gap-4 w-full  px-6 py-3 text-sm tracking-wide text-white capitalize transition-colors duration-300 transform bg-[#c00000] rounded-full hover:bg-[#c00000] focus:outline-none focus:ring focus:ring-red-300 focus:ring-opacity-50"
+                className="flex items-center justify-center gap-4 w-full px-6 py-3 text-sm tracking-wide text-white capitalize bg-[#c00000] rounded-full hover:bg-[#c00000] focus:outline-none focus:ring focus:ring-red-300 focus:ring-opacity-50"
               >
                 {loading && (
                   <div
-                    class="animate-spin inline-block size-4 border-[3px] border-current border-t-transparent text-white rounded-full"
+                    className="animate-spin inline-block size-4 border-[3px] border-current border-t-transparent text-white rounded-full"
                     role="status"
                     aria-label="loading"
                   >
-                    <span class="sr-only">Loading...</span>
+                    <span className="sr-only">Loading...</span>
                   </div>
                 )}
-                <span>Save </span>
-
+                <span>Save</span>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  class="w-5 h-5 rtl:-scale-x-100"
+                  className="w-5 h-5"
                   viewBox="0 0 20 20"
                   fill="currentColor"
                 >
                   <path
-                    fill-rule="evenodd"
+                    fillRule="evenodd"
                     d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                    clip-rule="evenodd"
+                    clipRule="evenodd"
                   />
                 </svg>
               </button>

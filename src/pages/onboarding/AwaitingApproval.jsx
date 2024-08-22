@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Awaiting } from "../../assets/export";
 
 const AwaitingApproval = () => {

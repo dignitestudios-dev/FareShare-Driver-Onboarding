@@ -2,19 +2,39 @@ import React, { useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { GetStarted } from "../../assets/export";
 import { Link } from "react-router-dom";
+import api from "../../api/apiInterceptor";
+import axios from "axios";
 
 const Splash = () => {
   const navigate = useNavigate();
   const { id, token } = useParams();
 
-  useEffect(() => {
-    console.log(id);
-    const decodedToken = decodeURIComponent(token);
-    const encodedToken = encodeURIComponent(token);
+  const getDriverStatus = async (token, id) => {
+    const headers = {
+      Authorization: `Bearer ${token}`,
+    };
+    const response = await axios.get(`https://backend.faresharellc.com
+/driver/status/${id}`);
+    if (response?.data?.data?.status == "pending") {
+      navigate("/awaiting-approval");
+    } else if (
+      response?.data?.data?.status == "approved" &&
+      response?.data?.data?.isSubscriptionPaid == false
+    ) {
+      localStorage.setItem("token", token);
+      navigate("/add-card");
+    } else {
+      navigate("/signup");
+    }
+  };
 
-    console.log("Token", token);
-    console.log(decodedToken);
-    console.log("Encoded", encodedToken);
+  useEffect(() => {
+    const decodedToken = decodeURIComponent(token);
+
+    if (id && decodedToken) {
+      getDriverStatus(decodedToken, id);
+    }
+
     // If you get an id check for subscription status of the driver and save this id for future use
   }, []);
   return (

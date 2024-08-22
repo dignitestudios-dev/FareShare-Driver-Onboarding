@@ -9,6 +9,7 @@ export const signupValues = {
   confirmPassword: "",
   phoneNo: "",
   referalCode: "",
+  accept: false,
 };
 
 export const verifyEmailValues = {

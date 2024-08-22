@@ -11,9 +11,12 @@ import Cookies from "js-cookie";
 import { FaApple, FaFacebookF } from "react-icons/fa";
 import { signInWithPopup } from "firebase/auth";
 import { Google } from "../../assets/export";
+import SocialSignupModal from "./SocialSignupModal";
+import authentication from "../../api/authenticationInterceptor";
 
 const SocialLogin = () => {
-  const { navigate, error, setError } = useContext(AppContext);
+  const { navigate, error, setError, isSocialLogin, setIsSocialLogin } =
+    useContext(AppContext);
 
   const [googleLoading, setGoogleLoading] = useState(false);
   const [appleLoading, setAppleLoading] = useState(false);
@@ -28,7 +31,7 @@ const SocialLogin = () => {
         const token = await result?.user?.getIdToken();
         if (token) {
           axios
-            .post(`https://backend.faresharellc.com/auth/brokerSocialSignIn`, {
+            .post(`https://backend.faresharellc.com/auth/driverSocialSignIn`, {
               email: result?.user?.email,
               idToken: token,
             })
@@ -38,14 +41,14 @@ const SocialLogin = () => {
                 Cookies.set("token", response?.data?.data?.token, {
                   expires: 7,
                 });
-                if (response?.data?.data?.token) {
-                  navigate("/home/");
-                }
+                // if (response?.data?.data?.token) {
+                //   navigate("/home/");
+                // }
               },
               (error) => {
                 setError(error?.response?.data?.message);
 
-                // if (error?.response?.data?.error == "No user found") {
+                // if (error?.response?.data?.message == "No user found") {
                 //   axios
                 //     .post(`https://backend.faresharellc.com/auth/brokerSocialSignIn`, {
                 //       id_token: token,
@@ -95,7 +98,6 @@ const SocialLogin = () => {
         }
       }
     } catch (err) {
-      setAppleLoading(false);
       setError("Cannot open apple signin modal.");
     }
   };
@@ -105,83 +107,49 @@ const SocialLogin = () => {
       setGoogleLoading(true);
       const result = await signInWithPopup(auth, googleProvider);
       if (result) {
-        console.log(result);
+        // console.log(result);
         const token = await result?.user?.getIdToken();
         if (token) {
-          axios
-            .post(`https://backend.faresharellc.com/auth/brokerSocialSignIn`, {
-              email: result?.user?.email,
-              idToken: token,
-            })
-            .then(
-              (response) => {
-                // just for now
-                Cookies.set("token", response?.data?.data?.token, {
-                  expires: 7,
-                });
-                if (response?.data?.data?.token) {
-                  navigate("/home/");
-                }
-              },
-              (error) => {
-                setError(error?.response?.data?.message);
-                // if (error?.response?.data?.error == "No user found") {
-                //   axios
-                //     .post(`${baseUrl}/register-social`, {
-                //       id_token: token,
-                //     })
-                //     .then(
-                //       (response) => {
-                //         console.log(response);
-                //         if (response?.status == 201) {
-                //           axios
-                //             .post(`${baseUrl}/login-social`, {
-                //               id_token: token,
-                //             })
-                //             .then(
-                //               (response) => {
-                //                 Cookies.set(
-                //                   "token",
-                //                   response?.data?.data?.token,
-                //                   { expires: 7 }
-                //                 );
-                //                 if (response?.data?.data?.token) {
-                //                   navigate("/home/");
-                //                 }
-                //               },
-                //               (error) => {
-                //                 setGoogleLoading(false);
-                //                 setFormError(error?.response?.data?.error);
-                //                 console.log(error);
-                //               }
-                //             );
-                //           if (response?.data?.data?.token) {
-                //             navigate("/home/");
-                //           }
-                //         }
-                //       },
-                //       (error) => {
-                //         setGoogleLoading(false);
-                //         setFormError(error?.response?.data?.error);
-                //         console.log(error);
-                //       }
-                //     );
-                // }
-                setGoogleLoading(false);
+          try {
+            const email = result?.user?.email;
+            const ip = await authentication.get(
+              "https://api.ipify.org?format=json"
+            );
+            const response = await authentication.post(
+              "/auth/driverSocialSignup",
+              {
+                email: email,
+                idToken: token,
+                ip: ip.data.ip,
               }
             );
+
+            if (response?.data?.success) {
+              localStorage.setItem("token", response?.data?.token);
+              setIsSocialLogin(true);
+              navigate("Complete Profile", "/complete-profile");
+            }
+          } catch (error) {
+            setError(error.response.data.message);
+          } finally {
+            setGoogleLoading(false);
+          }
         }
       }
     } catch (err) {
-      setGoogleLoading(false);
       setError("Cannot open google signin modal.");
+    } finally {
+      setGoogleLoading(false);
     }
   };
 
   return (
-    <div class="w-full grid grid-cols-1 lg:grid-cols-2 gap-3">
+    <div class="w-full grid grid-cols-1 lg:grid-cols-3 gap-3">
+      {/* <SocialSignupModal isOpen={openModal} setIsOpen={setOpenModal} /> */}
+
       <button
         type="button"
+        onClick={handleGoogleLogin}
         aria-label="Sign in with Google"
         class="flex items-center justify-center w-full bg-white border border-button-border-light rounded-full p-1 pr-3"
       >
@@ -213,6 +181,18 @@ const SocialLogin = () => {
         </div>
         <span class="text-sm text-google-text-gray tracking-wider">
           Continue with Apple
+        </span>
+      </button>
+      <button
+        type="button"
+        aria-label="Sign in with Facebook"
+        class="flex items-center justify-center bg-white border border-button-border-light rounded-full p-1 pr-3"
+      >
+        <div class="flex items-center justify-center bg-white w-9 h-9 rounded-full">
+          <FaFacebookF className="text-xl text-[#1877F2]" />
+        </div>
+        <span class="text-sm text-google-text-gray tracking-wider">
+          Sign in with Facebook
         </span>
       </button>
     </div>

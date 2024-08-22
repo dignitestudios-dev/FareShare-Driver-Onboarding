@@ -21,6 +21,7 @@ import {
   signInWithEmailAndPassword,
 } from "firebase/auth";
 import { useEffect } from "react";
+import SocialSignupModal from "../../components/authentication/SocialSignupModal";
 
 const Signup = () => {
   const { navigate, error, setError } = useContext(AppContext);
@@ -172,8 +173,8 @@ const Signup = () => {
                     type="text"
                     id="phoneNo"
                     name="phoneNo"
-                    value={values.phoneNo}
                     maxLength={12}
+                    value={values.phoneNo}
                     onChange={handleChange}
                     onBlur={handleBlur}
                     placeholder="Phone Number"
@@ -256,26 +257,41 @@ const Signup = () => {
                     </p>
                   ) : null}
                 </div>
-                <div class="flex items-center">
-                  <input
-                    id="checked-checkbox"
-                    type="checkbox"
-                    value=""
-                    class="w-3 h-3 text-[#c00000] bg-gray-100 border-gray-300 rounded focus:ring-[#c00000] accent-[#c00000]  focus:ring-2"
-                  />
-                  <label
-                    htmlFor="checked-checkbox"
-                    class="ms-2 text-xs my-2 font-medium text-gray-600 "
+                <div class="flex flex-col items-center">
+                  <div
+                    className={`flex items-center transition-colors duration-300 ${
+                      errors.accept && touched.accept ? " shake" : null
+                    }`}
                   >
-                    I Accept the{" "}
-                    <Link to={"/"} className="text-[#c00000]">
-                      Terms & Conditions
-                    </Link>{" "}
-                    and{" "}
-                    <Link to={"/"} className="text-[#c00000]">
-                      Privacy Policy
-                    </Link>
-                  </label>
+                    <input
+                      id="accept"
+                      type="checkbox"
+                      name="accept"
+                      value={values.accept}
+                      maxLength={12}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      class="w-3 h-3 text-[#c00000] bg-gray-100 border-gray-300 rounded focus:ring-[#c00000] accent-[#c00000]  focus:ring-2"
+                    />
+                    <label
+                      htmlFor="accept"
+                      class="ms-2 text-xs my-2 font-medium text-gray-600 "
+                    >
+                      I Accept the{" "}
+                      <Link to={"/"} className="text-[#c00000]">
+                        Terms & Conditions
+                      </Link>{" "}
+                      and{" "}
+                      <Link to={"/"} className="text-[#c00000]">
+                        Privacy Policy
+                      </Link>
+                    </label>
+                  </div>
+                  {errors.accept && touched.accept ? (
+                    <p className="text-red-700 text-sm ml-1 font-medium">
+                      {errors.accept}
+                    </p>
+                  ) : null}
                 </div>
               </div>
 

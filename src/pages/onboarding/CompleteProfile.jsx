@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect } from "react";
 import { FaApple, FaArrowLeft, FaFacebook, FaFacebookF } from "react-icons/fa";
 import { FiUser } from "react-icons/fi";
 import { TiUserAddOutline } from "react-icons/ti";
@@ -15,48 +15,152 @@ import { Link } from "react-router-dom";
 import { ImProfile } from "react-icons/im";
 import { AiOutlinePlusCircle } from "react-icons/ai";
 import { GoPlus } from "react-icons/go";
+import { completeProfileValues } from "../../data/profile/completeProfile";
+import { completeProfileSchema } from "../../schema/profile/completeProfileSchema";
+import { FaCircleCheck } from "react-icons/fa6";
+import api from "../../api/apiInterceptor";
 
 const CompleteProfile = () => {
-  const { navigate, error, setError } = useContext(AppContext);
+  const { navigate, error, setError, isSocialLogin } = useContext(AppContext);
   const [loading, setLoading] = useState(false);
+  const [profilePicture, setProfilePicture] = useState(null);
+  const [profileBase, setProfileBase] = useState(null);
+  const [phone, setPhone] = useState("");
+  const [phoneError, setPhoneError] = useState(false);
+  const [referal, setReferal] = useState("");
+  const [referalError, setReferalError] = useState(false);
+
+  const handleProfileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProfileBase(reader.result);
+      };
+      reader.readAsDataURL(file);
+      setProfilePicture(file);
+    }
+  };
+  const [social, setSocial] = useState(null);
+  const [socialBase, setSocialBase] = useState(null);
+  const handleSocialFrontClick = (e) => {
+    e.preventDefault();
+    document.getElementById("socialSecurityCardFront").click();
+  };
+
+  const handleSocialFrontChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setSocialBase(reader.result);
+      };
+      reader.readAsDataURL(file);
+      setSocial(file);
+    }
+  };
+
+  const [socialBack, setSocialBack] = useState(null);
+  const [socialBackBase, setSocialBackBase] = useState(null);
+  const handleSocialBackClick = (e) => {
+    e.preventDefault();
+    document.getElementById("socialSecurityCardBack").click();
+  };
+
+  const handleSocialBackChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setSocialBackBase(reader.result);
+      };
+      reader.readAsDataURL(file);
+      setSocialBack(file);
+    }
+  };
+
+  const handleProfileClick = (e) => {
+    e.preventDefault();
+    document.getElementById("profilePicture").click();
+  };
+
+  const formatDate = (val) => {
+    const date = new Date(val);
+
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0"); // Months are zero-based in JS
+    const day = String(date.getDate()).padStart(2, "0");
+
+    const formattedDate = `${year}-${month}-${day}`;
+    return formattedDate;
+  };
   const { values, handleBlur, handleChange, handleSubmit, errors, touched } =
     useFormik({
-      initialValues: signupValues,
-      validationSchema: signupSchema,
+      initialValues: completeProfileValues,
+      validationSchema: completeProfileSchema,
       validateOnChange: true,
       validateOnBlur: false,
 
       onSubmit: async (values, action) => {
         setLoading(true);
-        // try {
-        //   // API call to login using Axios interceptor
-        //   const response = await authentication.post("/auth/brokerSignIn", {
-        //     email: values.email,
-        //     password: values.password,
-        //   });
-
-        //   if (response?.status == 200 && response?.data?.token !== null) {
-        //     localStorage.setItem("token", response?.data?.token);
-        //     localStorage.setItem(
-        //       "broker",
-        //       JSON.stringify(response?.data?.data)
-        //     );
-        //     navigate("Home", "/home");
-        //   }
-        // } catch (error) {
-        //   console.log(error);
-        //   // Handle errors (e.g., show error message)
-        //   setError(error?.response?.data?.message);
-        // } finally {
-        //   // console.error("Login failed:", error.response?.data);
-        //   setLoading(false);
-        // }
-        setTimeout(() => {
-          navigate("Verify Email Otp", "verify-otp-email");
+        if (isSocialLogin && phone == "") {
+          setPhoneError("Please provide a valid phone number.");
           setLoading(false);
-        }, 2000);
+        } else {
+          const formdata = new FormData();
+          formdata.append("firstName", values.firstName);
+          formdata.append("lastName", values.lastName);
+          formdata.append("MI", values.MI);
+          formdata.append("suffix", values.suffix);
+          formdata.append("dateOfBirth", values.dateOfBirth);
+          formdata.append("gender", values.gender);
+          formdata.append("SSN", values.SSN);
+          formdata.append("driverLicenseNumber", values.driverLicenseNumber);
+          isSocialLogin && formdata.append("phoneNo", phone);
+          isSocialLogin &&
+            referal !== "" &&
+            formdata.append("referalCode", referal);
+          formdata.append("street", values.street);
+          formdata.append("city", values.city);
+          formdata.append("state", values.state);
+          formdata.append("zipcode", values.zipCode);
+          formdata.append("profilePicture", profilePicture);
+          formdata.append("socialSecurityCardFront", social);
+          formdata.append("socialSecurityCardBack", socialBack);
+
+          try {
+            const response = await api.post(
+              "/driver/completeProfile",
+              formdata
+            );
+            if (response.data.success) {
+              isSocialLogin && localStorage.setItem("phone", phone);
+              navigate("Verify Phone Otp", "/verify-otp-phone");
+            }
+          } catch (error) {
+            setError(error.response.data.message);
+          } finally {
+            setLoading(false);
+          }
+        }
       },
     });
+
+  // useEffect(() => {
+  //   const values = JSON.parse(localStorage.getItem("completeProfileValues"));
+  //   setProfileBase(values?.profileBase ? values?.profileBase : null);
+  //   setSocialBase(values?.socialBase ? values?.socialBase : null);
+  //   setSocialBackBase(values?.socialBackBase ? values?.socialBackBase : null);
+  //   setProfilePicture(values?.profilePicture ? values?.profilePicture : null);
+  //   setSocialBack(
+  //     values?.socialSecurityCardBack ? values?.socialSecurityCardBack : null
+  //   );
+  //   setSocial(
+  //     values?.socialSecurityCardFront ? values?.socialSecurityCardFront : null
+  //   );
+  //   setPhone(values?.phone ? values?.phone : "");
+  //   setReferal(values?.referal ? values?.referal : "");
+  // }, []);
   return (
     <section class="bg-white ">
       <div class="flex justify-center min-h-screen">
@@ -94,13 +198,42 @@ const CompleteProfile = () => {
                 <div className="w-full flex flex-col gap-1 justify-center items-center">
                   <button
                     type="button"
-                    className="w-[100px] h-[100px] rounded-full bg-gray-50 border border-gray-200 text-[#c00000] flex justify-center items-center text-2xl font-medium"
+                    onClick={handleProfileClick}
+                    className={`w-[100px] h-[100px] rounded-full bg-gray-50 border  text-[#c00000] flex justify-center items-center text-2xl font-medium transition-all duration-500 ${
+                      touched.profilePicture && errors.profilePicture
+                        ? "border-[#c00000] shake"
+                        : "border-gray-200"
+                    }`}
                   >
-                    <GoPlus />
+                    {profileBase ? (
+                      <img
+                        src={profileBase}
+                        className="w-full h-full rounded-full"
+                      />
+                    ) : (
+                      <GoPlus />
+                    )}
                   </button>
+                  <input
+                    type="file"
+                    id="profilePicture"
+                    name="profilePicture"
+                    accept="image/*"
+                    className="hidden"
+                    onBlur={handleBlur}
+                    onChange={(e) => {
+                      handleProfileChange(e);
+                      handleChange(e);
+                    }}
+                  />
                   <span className="text-xs text-[#c00000] font-medium">
                     Upload Profile Photo
                   </span>
+                  {errors.profilePicture && touched.profilePicture ? (
+                    <p className="text-red-700 text-sm ml-1 font-medium">
+                      {errors.profilePicture}
+                    </p>
+                  ) : null}
                 </div>
                 <div className="w-full grid grid-cols-2 gap-3">
                   <div>
@@ -109,21 +242,21 @@ const CompleteProfile = () => {
                     </label>
                     <input
                       type="text"
-                      id="email"
-                      name="email"
-                      value={values.email}
+                      id="firstName"
+                      name="firstName"
+                      value={values.firstName}
                       onChange={handleChange}
                       onBlur={handleBlur}
                       placeholder="John"
                       class={`block w-full px-5 py-3  text-gray-700 placeholder-gray-400 bg-gray-50 border border-gray-200 rounded-2xl   focus:border-[#c00000]  focus:ring-[#c00000] focus:outline-none focus:ring focus:ring-opacity-40 transition-colors duration-300 ${
-                        errors.email && touched.email
+                        errors.firstName && touched.firstName
                           ? "border-red-600 shake"
                           : null
                       }`}
                     />
-                    {errors.email && touched.email ? (
+                    {errors.firstName && touched.firstName ? (
                       <p className="text-red-700 text-sm font-medium">
-                        {errors.email}
+                        {errors.firstName}
                       </p>
                     ) : null}
                   </div>
@@ -133,21 +266,21 @@ const CompleteProfile = () => {
                     </label>
                     <input
                       type="text"
-                      id="email"
-                      name="email"
-                      value={values.email}
+                      id="lastName"
+                      name="lastName"
+                      value={values.lastName}
                       onChange={handleChange}
                       onBlur={handleBlur}
                       placeholder="Doe"
                       class={`block w-full px-5 py-3  text-gray-700 placeholder-gray-400 bg-gray-50 border border-gray-200 rounded-2xl   focus:border-[#c00000]  focus:ring-[#c00000] focus:outline-none focus:ring focus:ring-opacity-40 transition-colors duration-300 ${
-                        errors.email && touched.email
+                        errors.lastName && touched.lastName
                           ? "border-red-600 shake"
                           : null
                       }`}
                     />
-                    {errors.email && touched.email ? (
+                    {errors.lastName && touched.lastName ? (
                       <p className="text-red-700 text-sm font-medium">
-                        {errors.email}
+                        {errors.lastName}
                       </p>
                     ) : null}
                   </div>
@@ -159,21 +292,19 @@ const CompleteProfile = () => {
                   </label>
                   <input
                     type="text"
-                    id="email"
-                    name="email"
-                    value={values.email}
+                    id="MI"
+                    name="MI"
+                    value={values.MI}
                     onChange={handleChange}
                     onBlur={handleBlur}
                     placeholder="XXXXXXXXX"
                     class={`block w-full px-5 py-3  text-gray-700 placeholder-gray-400 bg-gray-50 border border-gray-200 rounded-2xl   focus:border-[#c00000]  focus:ring-[#c00000] focus:outline-none focus:ring focus:ring-opacity-40 transition-colors duration-300 ${
-                      errors.email && touched.email
-                        ? "border-red-600 shake"
-                        : null
+                      errors.MI && touched.MI ? "border-red-600 shake" : null
                     }`}
                   />
-                  {errors.email && touched.email ? (
+                  {errors.MI && touched.MI ? (
                     <p className="text-red-700 text-sm font-medium">
-                      {errors.email}
+                      {errors.MI}
                     </p>
                   ) : null}
                 </div>
@@ -184,21 +315,21 @@ const CompleteProfile = () => {
                   </label>
                   <input
                     type="text"
-                    id="email"
-                    name="email"
-                    value={values.email}
+                    id="suffix"
+                    name="suffix"
+                    value={values.suffix}
                     onChange={handleChange}
                     onBlur={handleBlur}
                     placeholder="XXXX"
                     class={`block w-full px-5 py-3  text-gray-700 placeholder-gray-400 bg-gray-50 border border-gray-200 rounded-2xl   focus:border-[#c00000]  focus:ring-[#c00000] focus:outline-none focus:ring focus:ring-opacity-40 transition-colors duration-300 ${
-                      errors.email && touched.email
+                      errors.suffix && touched.suffix
                         ? "border-red-600 shake"
                         : null
                     }`}
                   />
-                  {errors.email && touched.email ? (
+                  {errors.suffix && touched.suffix ? (
                     <p className="text-red-700 text-sm font-medium">
-                      {errors.email}
+                      {errors.suffix}
                     </p>
                   ) : null}
                 </div>
@@ -209,49 +340,125 @@ const CompleteProfile = () => {
                   </label>
                   <input
                     type="date"
-                    id="email"
-                    name="email"
-                    value={values.email}
+                    id="dateOfBirth"
+                    name="dateOfBirth"
+                    value={values.dateOfBirth}
                     onChange={handleChange}
                     onBlur={handleBlur}
                     placeholder="12/04/2024"
                     class={`block w-full px-5 py-3  text-gray-700 placeholder-gray-400 bg-gray-50 border border-gray-200 rounded-2xl   focus:border-[#c00000]  focus:ring-[#c00000] focus:outline-none focus:ring focus:ring-opacity-40 transition-colors duration-300 ${
-                      errors.email && touched.email
+                      errors.dateOfBirth && touched.dateOfBirth
                         ? "border-red-600 shake"
                         : null
                     }`}
                   />
-                  {errors.email && touched.email ? (
+                  {errors.dateOfBirth && touched.dateOfBirth ? (
                     <p className="text-red-700 text-sm font-medium">
-                      {errors.email}
+                      {errors.dateOfBirth}
                     </p>
                   ) : null}
                 </div>
 
                 <div>
                   <label class="block mb-1 text-sm text-gray-500 font-medium ml-1 ">
+                    Gender{" "}
+                  </label>
+                  <select
+                    type="date"
+                    id="gender"
+                    name="gender"
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    class={`block w-full px-5 py-3  text-gray-700 placeholder-gray-400 bg-gray-50 border border-gray-200 rounded-2xl   focus:border-[#c00000]  focus:ring-[#c00000] focus:outline-none focus:ring focus:ring-opacity-40 transition-colors duration-300 ${
+                      errors.gender && touched.gender
+                        ? "border-red-600 shake"
+                        : null
+                    }`}
+                  >
+                    {" "}
+                    {values?.gender !== "" && (
+                      <option value={values.gender}>{values.gender}</option>
+                    )}
+                    <option value={""}>--Select--</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                  </select>
+                  {errors.gender && touched.gender ? (
+                    <p className="text-red-700 text-sm font-medium">
+                      {errors.gender}
+                    </p>
+                  ) : null}
+                </div>
+                <div>
+                  <label class="block mb-1 text-sm text-gray-500 font-medium ml-1 ">
                     SSN
                   </label>
                   <input
                     type="text"
-                    id="email"
-                    name="email"
-                    value={values.email}
+                    id="SSN"
+                    name="SSN"
+                    value={values.SSN}
                     onChange={handleChange}
                     onBlur={handleBlur}
                     placeholder="XXXXXXXXXX"
                     class={`block w-full px-5 py-3  text-gray-700 placeholder-gray-400 bg-gray-50 border border-gray-200 rounded-2xl   focus:border-[#c00000]  focus:ring-[#c00000] focus:outline-none focus:ring focus:ring-opacity-40 transition-colors duration-300 ${
-                      errors.email && touched.email
-                        ? "border-red-600 shake"
-                        : null
+                      errors.SSN && touched.SSN ? "border-red-600 shake" : null
                     }`}
                   />
-                  {errors.email && touched.email ? (
+                  {errors.SSN && touched.SSN ? (
                     <p className="text-red-700 text-sm font-medium">
-                      {errors.email}
+                      {errors.SSN}
                     </p>
                   ) : null}
                 </div>
+
+                {isSocialLogin ? (
+                  <>
+                    <div>
+                      <label class="block mb-1 text-sm text-gray-500 font-medium ml-1 ">
+                        Phone Number
+                      </label>
+                      <input
+                        type="text"
+                        id="phone"
+                        name="phone"
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        placeholder="+1234567890"
+                        class={`block w-full px-5 py-3  text-gray-700 placeholder-gray-400 bg-gray-50 border border-gray-200 rounded-2xl   focus:border-[#c00000]  focus:ring-[#c00000] focus:outline-none focus:ring focus:ring-opacity-40 transition-colors duration-300 ${
+                          phoneError ? "border-red-600 shake" : null
+                        }`}
+                      />
+                      {phoneError ? (
+                        <p className="text-red-700 text-sm font-medium">
+                          {phoneError}
+                        </p>
+                      ) : null}
+                    </div>
+
+                    <div>
+                      <label class="block mb-1 text-sm text-gray-500 font-medium ml-1 ">
+                        Referal Code
+                      </label>
+                      <input
+                        type="text"
+                        id="referal"
+                        name="referal"
+                        value={referal}
+                        onChange={(e) => setReferal(e.target.value)}
+                        placeholder="XXXXX"
+                        class={`block w-full px-5 py-3  text-gray-700 placeholder-gray-400 bg-gray-50 border border-gray-200 rounded-2xl   focus:border-[#c00000]  focus:ring-[#c00000] focus:outline-none focus:ring focus:ring-opacity-40 transition-colors duration-300 ${
+                          referalError ? "border-red-600 shake" : null
+                        }`}
+                      />
+                      {referalError ? (
+                        <p className="text-red-700 text-sm font-medium">
+                          {referalError}
+                        </p>
+                      ) : null}
+                    </div>
+                  </>
+                ) : null}
 
                 <div>
                   <label class="block mb-1 text-sm text-gray-500 font-medium ml-1 ">
@@ -259,69 +466,46 @@ const CompleteProfile = () => {
                   </label>
                   <input
                     type="text"
-                    id="email"
-                    name="email"
-                    value={values.email}
+                    id="driverLicenseNumber"
+                    name="driverLicenseNumber"
+                    value={values.driverLicenseNumber}
                     onChange={handleChange}
                     onBlur={handleBlur}
                     placeholder="XXXXXXXXXXX"
                     class={`block w-full px-5 py-3  text-gray-700 placeholder-gray-400 bg-gray-50 border border-gray-200 rounded-2xl   focus:border-[#c00000]  focus:ring-[#c00000] focus:outline-none focus:ring focus:ring-opacity-40 transition-colors duration-300 ${
-                      errors.email && touched.email
+                      errors.driverLicenseNumber && touched.driverLicenseNumber
                         ? "border-red-600 shake"
                         : null
                     }`}
                   />
-                  {errors.email && touched.email ? (
+                  {errors.driverLicenseNumber && touched.driverLicenseNumber ? (
                     <p className="text-red-700 text-sm font-medium">
-                      {errors.email}
+                      {errors.driverLicenseNumber}
                     </p>
                   ) : null}
                 </div>
-                <div>
-                  <label class="block mb-1 text-sm text-gray-500 font-medium ml-1 ">
-                    Phone Number
-                  </label>
-                  <input
-                    type="text"
-                    id="email"
-                    name="email"
-                    value={values.email}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    placeholder="+12345678901"
-                    class={`block w-full px-5 py-3  text-gray-700 placeholder-gray-400 bg-gray-50 border border-gray-200 rounded-2xl   focus:border-[#c00000]  focus:ring-[#c00000] focus:outline-none focus:ring focus:ring-opacity-40 transition-colors duration-300 ${
-                      errors.email && touched.email
-                        ? "border-red-600 shake"
-                        : null
-                    }`}
-                  />
-                  {errors.email && touched.email ? (
-                    <p className="text-red-700 text-sm font-medium">
-                      {errors.email}
-                    </p>
-                  ) : null}
-                </div>
+
                 <div>
                   <label class="block mb-1 text-sm text-gray-500 font-medium ml-1 ">
                     Street
                   </label>
                   <input
                     type="text"
-                    id="email"
-                    name="email"
-                    value={values.email}
+                    id="street"
+                    name="street"
+                    value={values.street}
                     onChange={handleChange}
                     onBlur={handleBlur}
                     placeholder="XXXX Name Street, City, State"
                     class={`block w-full px-5 py-3  text-gray-700 placeholder-gray-400 bg-gray-50 border border-gray-200 rounded-2xl   focus:border-[#c00000]  focus:ring-[#c00000] focus:outline-none focus:ring focus:ring-opacity-40 transition-colors duration-300 ${
-                      errors.email && touched.email
+                      errors.street && touched.street
                         ? "border-red-600 shake"
                         : null
                     }`}
                   />
-                  {errors.email && touched.email ? (
+                  {errors.street && touched.street ? (
                     <p className="text-red-700 text-sm font-medium">
-                      {errors.email}
+                      {errors.street}
                     </p>
                   ) : null}
                 </div>
@@ -331,21 +515,21 @@ const CompleteProfile = () => {
                   </label>
                   <input
                     type="text"
-                    id="email"
-                    name="email"
-                    value={values.email}
+                    id="city"
+                    name="city"
+                    value={values.city}
                     onChange={handleChange}
                     onBlur={handleBlur}
                     placeholder="Orlando"
                     class={`block w-full px-5 py-3  text-gray-700 placeholder-gray-400 bg-gray-50 border border-gray-200 rounded-2xl   focus:border-[#c00000]  focus:ring-[#c00000] focus:outline-none focus:ring focus:ring-opacity-40 transition-colors duration-300 ${
-                      errors.email && touched.email
+                      errors.city && touched.city
                         ? "border-red-600 shake"
                         : null
                     }`}
                   />
-                  {errors.email && touched.email ? (
+                  {errors.city && touched.city ? (
                     <p className="text-red-700 text-sm font-medium">
-                      {errors.email}
+                      {errors.city}
                     </p>
                   ) : null}
                 </div>
@@ -357,21 +541,21 @@ const CompleteProfile = () => {
                     </label>
                     <input
                       type="text"
-                      id="email"
-                      name="email"
-                      value={values.email}
+                      id="state"
+                      name="state"
+                      value={values.state}
                       onChange={handleChange}
                       onBlur={handleBlur}
                       placeholder="Florida"
                       class={`block w-full px-5 py-3  text-gray-700 placeholder-gray-400 bg-gray-50 border border-gray-200 rounded-2xl   focus:border-[#c00000]  focus:ring-[#c00000] focus:outline-none focus:ring focus:ring-opacity-40 transition-colors duration-300 ${
-                        errors.email && touched.email
+                        errors.state && touched.state
                           ? "border-red-600 shake"
                           : null
                       }`}
                     />
-                    {errors.email && touched.email ? (
+                    {errors.state && touched.state ? (
                       <p className="text-red-700 text-sm font-medium">
-                        {errors.email}
+                        {errors.state}
                       </p>
                     ) : null}
                   </div>
@@ -381,66 +565,135 @@ const CompleteProfile = () => {
                     </label>
                     <input
                       type="text"
-                      id="email"
-                      name="email"
-                      value={values.email}
+                      id="zipCode"
+                      name="zipCode"
+                      value={values.zipCode}
                       onChange={handleChange}
                       onBlur={handleBlur}
                       placeholder="XXXXX"
                       class={`block w-full px-5 py-3  text-gray-700 placeholder-gray-400 bg-gray-50 border border-gray-200 rounded-2xl   focus:border-[#c00000]  focus:ring-[#c00000] focus:outline-none focus:ring focus:ring-opacity-40 transition-colors duration-300 ${
-                        errors.email && touched.email
+                        errors.zipCode && touched.zipCode
                           ? "border-red-600 shake"
                           : null
                       }`}
                     />
-                    {errors.email && touched.email ? (
+                    {errors.zipCode && touched.zipCode ? (
                       <p className="text-red-700 text-sm font-medium">
-                        {errors.email}
+                        {errors.zipCode}
                       </p>
                     ) : null}
                   </div>
                 </div>
 
                 <div className="w-full grid grid-cols-2 gap-2">
-                  <div className="h-[139px] bg-gray-50 rounded-2xl border border-gray-200 p-3 w-full flex flex-col gap-2 justify-center items-center">
-                    <div className="w-full flex items-center justify-center gap-1">
-                      <span className="w-6 h-6 rounded-full bg-[#c00000] text-white flex items-center justify-center text-xs">
-                        <ImProfile />
+                  <div className="w-full h-aut0 flex flex-col justify-start items-start gap-1">
+                    <div className="h-[139px] bg-gray-50 rounded-2xl border border-gray-200 p-3 w-full flex flex-col gap-2 justify-center items-center">
+                      <div className="w-full flex items-center justify-center gap-1">
+                        <span className="w-6 h-6 rounded-full bg-[#c00000] text-white flex items-center justify-center text-xs">
+                          <ImProfile />
+                        </span>
+                        <span className="text-[13.5px] font-bold text-black">
+                          Social Security
+                        </span>
+                      </div>
+                      <span className="text-[12px] font-[510] text-black">
+                        Front
                       </span>
-                      <span className="text-[13.5px] font-bold text-black">
-                        Social Security
-                      </span>
-                    </div>
-                    <span className="text-[12px] font-[510] text-black">
-                      Front
-                    </span>
 
-                    <div className="w-full flex items-center justify-center gap-2 text-black">
-                      <AiOutlinePlusCircle />
-                      <span className="text-[12px] underline underline-offset-2 font-bold text-black">
-                        Add Documents
-                      </span>
+                      <input
+                        type="file"
+                        id="socialSecurityCardFront"
+                        name="socialSecurityCardFront"
+                        accept="image/*"
+                        className="hidden"
+                        onBlur={handleBlur}
+                        onChange={(e) => {
+                          handleSocialFrontChange(e);
+                          handleChange(e);
+                        }}
+                      />
+
+                      <button
+                        onClick={handleSocialFrontClick}
+                        className="w-full flex items-center justify-center gap-2 text-black"
+                      >
+                        {socialBase ? (
+                          <>
+                            <FaCircleCheck className="text-green-500" />
+                            <span className="text-[12px] underline underline-offset-2 font-bold text-green-500">
+                              Document Added
+                            </span>
+                          </>
+                        ) : (
+                          <>
+                            <AiOutlinePlusCircle />
+                            <span className="text-[12px] underline underline-offset-2 font-bold text-black">
+                              Add Documents
+                            </span>
+                          </>
+                        )}
+                      </button>
                     </div>
+                    {errors.socialSecurityCardFront &&
+                    touched.socialSecurityCardFront ? (
+                      <p className="text-red-700 text-sm ml-1 font-medium">
+                        {errors.socialSecurityCardFront}
+                      </p>
+                    ) : null}
                   </div>
-                  <div className="h-[139px] bg-gray-50 rounded-2xl border border-gray-200 p-3 w-full flex flex-col gap-2 justify-center items-center">
-                    <div className="w-full flex items-center justify-center gap-1">
-                      <span className="w-6 h-6 rounded-full bg-[#c00000] text-white flex items-center justify-center text-xs">
-                        <ImProfile />
+                  <div className="w-full h-aut0 flex flex-col justify-start items-start gap-1">
+                    <div className="h-[139px] bg-gray-50 rounded-2xl border border-gray-200 p-3 w-full flex flex-col gap-2 justify-center items-center">
+                      <div className="w-full flex items-center justify-center gap-1">
+                        <span className="w-6 h-6 rounded-full bg-[#c00000] text-white flex items-center justify-center text-xs">
+                          <ImProfile />
+                        </span>
+                        <span className="text-[13.5px] font-bold text-black">
+                          Social Security
+                        </span>
+                      </div>
+                      <input
+                        type="file"
+                        id="socialSecurityCardBack"
+                        name="socialSecurityCardBack"
+                        accept="image/*"
+                        className="hidden"
+                        onBlur={handleBlur}
+                        onChange={(e) => {
+                          handleSocialBackChange(e);
+                          handleChange(e);
+                        }}
+                      />
+                      <span className="text-[12px] font-[510] text-black">
+                        Back
                       </span>
-                      <span className="text-[13.5px] font-bold text-black">
-                        Social Security
-                      </span>
-                    </div>
-                    <span className="text-[12px] font-[510] text-black">
-                      Back
-                    </span>
 
-                    <div className="w-full flex items-center justify-center gap-2 text-black">
-                      <AiOutlinePlusCircle />
-                      <span className="text-[12px] underline underline-offset-2 font-bold text-black">
-                        Add Documents
-                      </span>
+                      <button
+                        onClick={handleSocialBackClick}
+                        className="w-full flex items-center justify-center gap-2 text-black"
+                      >
+                        {socialBackBase ? (
+                          <>
+                            <FaCircleCheck className="text-green-500" />
+                            <span className="text-[12px] underline underline-offset-2 font-bold text-green-500">
+                              Document Added
+                            </span>
+                          </>
+                        ) : (
+                          <>
+                            <AiOutlinePlusCircle />
+                            <span className="text-[12px] underline underline-offset-2 font-bold text-black">
+                              Add Documents
+                            </span>
+                          </>
+                        )}
+                      </button>
                     </div>
+                    {errors.socialSecurityCardBack &&
+                    touched.socialSecurityCardBack ? (
+                      <p className="text-red-700 text-sm ml-1 font-medium">
+                        {errors.socialSecurityCardBack}
+                      </p>
+                    ) : null}
                   </div>
                 </div>
               </div>

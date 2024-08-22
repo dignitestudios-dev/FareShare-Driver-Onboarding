@@ -28,49 +28,9 @@ import PaymentForm from "./PaymentForm";
 import { Card } from "../../assets/export";
 
 const AddCard = () => {
-  const { navigate, error, setError } = useContext(AppContext);
-  const [loading, setLoading] = useState(false);
-  const { values, handleBlur, handleChange, handleSubmit, errors, touched } =
-    useFormik({
-      initialValues: signupValues,
-      validationSchema: signupSchema,
-      validateOnChange: true,
-      validateOnBlur: false,
-
-      onSubmit: async (values, action) => {
-        setLoading(true);
-        // try {
-        //   // API call to login using Axios interceptor
-        //   const response = await authentication.post("/auth/brokerSignIn", {
-        //     email: values.email,
-        //     password: values.password,
-        //   });
-
-        //   if (response?.status == 200 && response?.data?.token !== null) {
-        //     localStorage.setItem("token", response?.data?.token);
-        //     localStorage.setItem(
-        //       "broker",
-        //       JSON.stringify(response?.data?.data)
-        //     );
-        //     navigate("Home", "/home");
-        //   }
-        // } catch (error) {
-        //   console.log(error);
-        //   // Handle errors (e.g., show error message)
-        //   setError(error?.response?.data?.message);
-        // } finally {
-        //   // console.error("Login failed:", error.response?.data);
-        //   setLoading(false);
-        // }
-        setTimeout(() => {
-          navigate("Verify Email Otp", "verify-otp-email");
-          setLoading(false);
-        }, 2000);
-      },
-    });
-
   // Load your Stripe public key
   const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_API_KEY);
+  const { error, setError } = useContext(AppContext);
 
   return (
     <section class="bg-white ">

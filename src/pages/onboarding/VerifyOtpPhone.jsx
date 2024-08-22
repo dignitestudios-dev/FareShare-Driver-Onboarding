@@ -8,10 +8,15 @@ import { verifyOtpValues } from "../../data/authentication";
 import { useFormik } from "formik";
 import authentication from "../../api/authenticationInterceptor";
 import Cookies from "js-cookie";
+import api from "../../api/apiInterceptor";
+import Error from "../../components/app/global/Error";
+import SuccessToast from "../../components/app/global/SuccessToast";
 
 const VerifyOtpPhone = () => {
-  const { navigate, error, setError } = useContext(AppContext);
+  const { navigate, error, setError, isSocialLogin } = useContext(AppContext);
   const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+
   const { values, handleBlur, handleChange, handleSubmit, errors, touched } =
     useFormik({
       initialValues: verifyOtpValues,
@@ -25,14 +30,18 @@ const VerifyOtpPhone = () => {
         try {
           const otp = values.otp1 + values.otp2 + values.otp3 + values.otp4;
           // API call to login using Axios interceptor
-          const response = await api.post("/auth/validateOTP", {
+          const response = await api.post("/auth/validatePhoneOTP", {
             phoneNo: phone,
             code: otp,
           });
 
           if (response?.data?.success) {
+            setSuccess("Phone  Verified Successfully Successfully.");
+
             // localStorage.setItem("token", response?.data?.token);
-            navigate("Complete Profile", "/complete-profile");
+            isSocialLogin
+              ? navigate("Upload Vehicle Images", "/upload-vehicle-images")
+              : navigate("Complete Profile", "/complete-profile");
           }
         } catch (error) {
           // Handle errors (e.g., show error message)
@@ -42,10 +51,6 @@ const VerifyOtpPhone = () => {
         } finally {
           setLoading(false);
         }
-        setTimeout(() => {
-          navigate("Complete Profile", "complete-profile");
-          setLoading(false);
-        }, 2000);
       },
     });
 
@@ -113,14 +118,25 @@ const VerifyOtpPhone = () => {
     }
   };
 
-  // Add any custom logic here, e.g., validation or formatting
-  // For example, trimming whitespace:
-  // const trimmedValue = value.trim();
-
-  // formik.setFieldValue(name, trimmedValue);
-
-  // If you want to manually handle `touched`, you can set the field as touched
-  // formik.setFieldTouched(name, true, false);
+  // Resend OTP:
+  const [resendLoading, setResendLoading] = useState(false);
+  const resendOtp = async () => {
+    setResendLoading(true);
+    try {
+      const response = await api.post("/auth/sendPhoneOTP", {
+        phoneNo: localStorage.getItem("phone"),
+      });
+      if (response?.data?.success) {
+        setSuccess("OTP Resend Successfully.");
+      }
+    } catch (error) {
+      // Handle errors (e.g., show error message)
+      setError(error?.response?.data?.message);
+      // console.error("Login failed:", error.response?.data);
+    } finally {
+      setResendLoading(false);
+    }
+  };
 
   return (
     <section className="bg-white">
@@ -134,6 +150,8 @@ const VerifyOtpPhone = () => {
             />
           </div>
         </div>
+        <Error error={error} setError={setError} />
+        <SuccessToast success={success} setSuccess={setSuccess} />
 
         <div className="flex items-center w-full max-w-3xl p-8 mx-auto lg:px-12 lg:w-1/2">
           <div className="w-full">
@@ -283,8 +301,19 @@ const VerifyOtpPhone = () => {
                       </button>
                       <button
                         type="button"
-                        class="h-14 text-lg font-semibold w-full xl:w-[24rem] border-2 border-[#c00000] text-[#c00000] rounded-full transition-all duration-200 hover:bg-[#c00000] hover:text-white"
+                        onClick={resendOtp}
+                        disabled={resendLoading}
+                        class="h-14 text-lg font-semibold w-full xl:w-[24rem] border-2 border-[#c00000] text-[#c00000] rounded-full transition-all flex justify-center items-center gap-2 duration-200 hover:bg-[#c00000] hover:text-white"
                       >
+                        {resendLoading && (
+                          <div
+                            class="animate-spin inline-block size-6 border-[3px] border-current border-t-transparent text-white rounded-full"
+                            role="status"
+                            aria-label="loading"
+                          >
+                            <span class="sr-only">Loading...</span>
+                          </div>
+                        )}
                         Resend Code
                       </button>
                     </div>
