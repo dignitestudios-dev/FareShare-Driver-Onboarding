@@ -45,7 +45,7 @@ const VerifyOtpEmail = () => {
                 };
                 axios
                   .post(
-                    "/auth/sendPhoneOTP",
+                    "https://backend.faresharellc.com/auth/sendPhoneOTP",
                     {
                       phoneNo: window.localStorage.getItem("phone"),
                     },
