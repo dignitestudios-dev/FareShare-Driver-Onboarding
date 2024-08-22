@@ -8,6 +8,7 @@ import { vehicleImagesValues } from "../../data/profile/vehicleImages";
 import { vehicleImagesSchema } from "../../schema/profile/vehicleImagesSchema";
 import Error from "../../components/app/global/Error";
 import api from "../../api/apiInterceptor";
+import axios from "axios";
 
 const UploadVehicleImages = () => {
   const { navigate, error, setError, setIsUploaded, setVehicle_id } =
@@ -73,9 +74,13 @@ const UploadVehicleImages = () => {
         );
 
         try {
-          const response = await api.post(
-            "driver/completeVehicleDocs",
-            formdata
+          const headers = {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          };
+          const response = await axios.post(
+            "https://backend.faresharellc.com/driver/completeVehicleDocs",
+            formdata,
+            { headers }
           );
           if (response.data.success) {
             setIsUploaded(true);
@@ -109,12 +114,12 @@ const UploadVehicleImages = () => {
             <Error error={error} setError={setError} />
 
             <div className="w-full flex justify-center items-center">
-              <Link
+              {/* <Link
                 to={"/add-vehicle"}
                 className="w-10 h-10 mr-auto rounded-full flex justify-center items-center text-md bg-[#c00000] text-white"
               >
                 <FaArrowLeft />
-              </Link>
+              </Link> */}
               <h1 className="text-[17px] lg:text-[24px] font-semibold text-center text-gray-800">
                 Upload vehicle images
               </h1>

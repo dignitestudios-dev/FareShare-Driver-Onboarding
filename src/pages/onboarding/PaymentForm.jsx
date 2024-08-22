@@ -1,8 +1,6 @@
 import React, { useContext, useState } from "react";
 import {
-  CardNumberElement,
-  CardExpiryElement,
-  CardCvcElement,
+  PaymentElement,
   useStripe,
   useElements,
 } from "@stripe/react-stripe-js";
@@ -11,7 +9,7 @@ import { AppContext } from "../../context/AppContext";
 const PaymentForm = () => {
   const stripe = useStripe();
   const elements = useElements();
-  const { navigate, error, setError } = useContext(AppContext);
+  const { navigate, error, setError, paymentIntentId } = useContext(AppContext);
 
   const [isLoading, setIsLoading] = useState(false);
 
@@ -20,117 +18,44 @@ const PaymentForm = () => {
     setIsLoading(true);
 
     if (!stripe || !elements) {
-      setIsLoading(false);
       return;
     }
 
-    const cardElement = elements.getElement(CardNumberElement);
-
-    const { error, paymentMethod } = await stripe.createPaymentMethod({
-      type: "card",
-      card: cardElement,
-      billing_details: {
-        // Add any additional billing details here (optional)
+    const paymentResult = await stripe.confirmPayment({
+      elements,
+      confirmParams: {
+        // Make sure to change this to your payment completion page
+        return_url: `${window.location.origin}/success`,
       },
     });
 
-    if (error) {
-      setError(error.message);
+    const paymentIntentId = paymentResult.paymentIntent.id;
+    window.localStorage.setItem("paymentIntent", paymentIntentId);
+    console.log(paymentIntentId);
+
+    // Extract Subscription ID if it's a subscription payment
+    const subscriptionId = paymentResult.paymentIntent.metadata.subscription_id;
+    window.localStorage.setItem("subscriptionId", paymentIntentId);
+    console.log(subscriptionId);
+
+    if (
+      paymentResult.error.type === "card_error" ||
+      paymentResult.error.type === "validation_error"
+    ) {
+      setError(paymentResult.error.message);
       setIsLoading(false);
     } else {
-      console.log("PaymentMethod ID:", paymentMethod.id);
-      // Send paymentMethod.id to your backend to create a PaymentIntent or confirm a payment
       setIsLoading(false);
+
+      setError("An unexpected error occured.");
     }
   };
 
   return (
     <form onSubmit={handleSubmit}>
-      <div>
-        <label className="text-xs font-semibold text-gray-600">
-          Card Number
-        </label>
-        <CardNumberElement
-          className="w-full bg-gray-50 border border-gray-200 h-12 rounded-xl px-3 py-3"
-          options={{
-            style: {
-              base: {
-                backgroundColor: "#F9FAFB",
-                color: "#424770",
-                fontFamily: "Source Code Pro, monospace",
-                "::placeholder": {
-                  color: "#aab7c4",
-                },
-              },
-              invalid: {
-                color: "#9e2146",
-              },
-            },
-          }}
-        />
-      </div>
+      <PaymentElement />
 
-      <div>
-        <label className="text-xs font-semibold text-gray-600">
-          Expiration Date
-        </label>
-
-        <CardExpiryElement
-          className="w-full bg-gray-50 border border-gray-200 h-12 rounded-xl px-3 py-3"
-          options={{
-            style: {
-              base: {
-                backgroundColor: "#F9FAFB",
-
-                color: "#424770",
-                fontFamily: "Source Code Pro, monospace",
-                "::placeholder": {
-                  color: "#aab7c4",
-                },
-              },
-              invalid: {
-                color: "#9e2146",
-              },
-            },
-          }}
-        />
-      </div>
-
-      <div>
-        <label className="text-xs font-semibold text-gray-600">CVC</label>
-        <CardCvcElement
-          className="w-full bg-gray-50 border border-gray-200 h-12 rounded-xl px-3 py-3"
-          options={{
-            style: {
-              base: {
-                backgroundColor: "#F9FAFB",
-
-                color: "#424770",
-                fontFamily: "Source Code Pro, monospace",
-                "::placeholder": {
-                  color: "#aab7c4",
-                },
-              },
-              invalid: {
-                color: "#9e2146",
-              },
-            },
-          }}
-        />
-      </div>
-
-      <div>
-        <label className="text-xs font-semibold text-gray-600 ">ZIP Code</label>
-        <input
-          type="text"
-          placeholder="12345"
-          maxLength={5}
-          className="w-full border bg-gray-50 text-[#424770] text-sm outline-none placeholder:text-[#aab7c4] border-gray-200 h-12 rounded-xl px-3 "
-        />
-        {/* Optional: You can also use Stripe's PostalCodeElement for ZIP Code */}
-      </div>
-
-      {error && <div style={{ color: "red" }}>{error}</div>}
+      {/* {error && <div style={{ color: "red" }}>{error}</div>} */}
       <button
         type="submit"
         disabled={isLoading || !stripe || !elements}

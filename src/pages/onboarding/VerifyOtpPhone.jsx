@@ -11,6 +11,7 @@ import Cookies from "js-cookie";
 import api from "../../api/apiInterceptor";
 import Error from "../../components/app/global/Error";
 import SuccessToast from "../../components/app/global/SuccessToast";
+import axios from "axios";
 
 const VerifyOtpPhone = () => {
   const { navigate, error, setError, isSocialLogin } = useContext(AppContext);
@@ -30,10 +31,17 @@ const VerifyOtpPhone = () => {
         try {
           const otp = values.otp1 + values.otp2 + values.otp3 + values.otp4;
           // API call to login using Axios interceptor
-          const response = await api.post("/auth/validatePhoneOTP", {
-            phoneNo: phone,
-            code: otp,
-          });
+          const headers = {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          };
+          const response = await axios.post(
+            "https://backend.faresharellc.com/auth/validatePhoneOTP",
+            {
+              phoneNo: phone,
+              code: otp,
+            },
+            { headers }
+          );
 
           if (response?.data?.success) {
             setSuccess("Phone  Verified Successfully Successfully.");
@@ -123,9 +131,16 @@ const VerifyOtpPhone = () => {
   const resendOtp = async () => {
     setResendLoading(true);
     try {
-      const response = await api.post("/auth/sendPhoneOTP", {
-        phoneNo: localStorage.getItem("phone"),
-      });
+      const headers = {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      };
+      const response = await axios.post(
+        "https://backend.faresharellc.com/auth/sendPhoneOTP",
+        {
+          phoneNo: localStorage.getItem("phone"),
+        },
+        { headers }
+      );
       if (response?.data?.success) {
         setSuccess("OTP Resend Successfully.");
       }

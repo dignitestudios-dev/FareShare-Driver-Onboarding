@@ -27,6 +27,8 @@ export const AppContextProvider = ({ children }) => {
   const [isUploaded, setIsUploaded] = useState(false);
   const [isSocialLogin, setIsSocialLogin] = useState(false);
   const [vehicle_id, setVehicle_id] = useState(null);
+  const [clientSecret, setClientSecret] = useState("");
+  const [paymentIntent, setPaymentIntent] = useState("");
 
   return (
     <AppContext.Provider
@@ -48,6 +50,10 @@ export const AppContextProvider = ({ children }) => {
         setIsSocialLogin,
         vehicle_id,
         setVehicle_id,
+        clientSecret,
+        setClientSecret,
+        paymentIntent,
+        setPaymentIntent,
       }}
     >
       {children}

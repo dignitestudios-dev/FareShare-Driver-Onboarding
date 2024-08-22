@@ -160,7 +160,14 @@ const AddVehicle = () => {
           formdata.append("vehicleRegistrationCard", registration);
           formdata.append("vehicleId", vehicle_id);
 
-          const response = await api.post("/driver/completeVehicle", formdata);
+          const headers = {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          };
+          const response = await axios.post(
+            "https://backend.faresharellc.com/driver/completeVehicle",
+            formdata,
+            { headers }
+          );
           if (response?.data?.success) {
             navigate("Awaiting Approval", "/awaiting-approval");
           }
@@ -190,13 +197,13 @@ const AddVehicle = () => {
             <Error error={error} setError={setError} />
 
             <div className="w-full flex justify-center items-center">
-              <Link
+              {/* <Link
                 to={"/complete-profile"}
                 className="w-10 h-10 mr-auto rounded-full flex justify-center items-center text-md bg-[#c00000] text-white"
               >
                 <FaArrowLeft />
-              </Link>
-              <h1 class="text-[17px] mr-auto lg:text-[24px] font-semibold text-center tracking-tight text-gray-800 capitalize ">
+              </Link> */}
+              <h1 class="text-[17px]  lg:text-[24px] font-semibold text-center tracking-tight text-gray-800 capitalize ">
                 Add Vehicle{" "}
               </h1>
             </div>

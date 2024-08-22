@@ -129,13 +129,21 @@ const CompleteProfile = () => {
           formdata.append("socialSecurityCardBack", socialBack);
 
           try {
-            const response = await api.post(
-              "/driver/completeProfile",
-              formdata
+            const headers = {
+              Authorization: `Bearer ${window.localStorage.getItem("token")}`,
+            };
+            const response = await axios.post(
+              "https://backend.faresharellc.com/driver/completeProfile",
+              formdata,
+              {
+                headers,
+              }
             );
             if (response.data.success) {
               isSocialLogin && localStorage.setItem("phone", phone);
-              navigate("Verify Phone Otp", "/verify-otp-phone");
+              isSocialLogin
+                ? navigate("Verify Phone Otp", "/verify-otp-phone")
+                : navigate("Verify Phone Otp", "/upload-vehicle-images");
             }
           } catch (error) {
             setError(error.response.data.message);
@@ -179,13 +187,13 @@ const CompleteProfile = () => {
             <Error error={error} setError={setError} />
 
             <div className="w-full flex justify-center items-center">
-              <Link
+              {/* <Link
                 to={"/signup"}
                 className="w-10 h-10 mr-auto rounded-full flex justify-center items-center text-md bg-[#c00000] text-white"
               >
                 <FaArrowLeft />
-              </Link>
-              <h1 class="text-[17px] mr-auto lg:text-[24px] font-semibold text-center tracking-tight text-gray-800 capitalize ">
+              </Link> */}
+              <h1 class="text-[17px]  lg:text-[24px] font-semibold text-center tracking-tight text-gray-800 capitalize ">
                 Update Personal Info{" "}
               </h1>
             </div>

@@ -14,7 +14,6 @@ import Cookies from "js-cookie";
 import authentication from "../../api/authenticationInterceptor";
 import { useState } from "react";
 import Error from "../../components/app/global/Error";
-import axios from "axios";
 import { signupSchema } from "../../schema/signupSchema";
 import { signupValues } from "../../data/authentication";
 import { Link } from "react-router-dom";
@@ -23,50 +22,51 @@ import { AiOutlinePlusCircle } from "react-icons/ai";
 import { GoPlus } from "react-icons/go";
 import { IoIosArrowRoundForward } from "react-icons/io";
 import { Bank } from "../../assets/export";
+import axios from "axios";
+import { addBankValues } from "../../data/profile/addBank";
+import { addBankSchema } from "../../schema/profile/addBankSchema";
+import FinalSuccess from "./FinalSuccess";
 
 const AddBank = () => {
   const { navigate, error, setError } = useContext(AppContext);
   const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
   const { values, handleBlur, handleChange, handleSubmit, errors, touched } =
     useFormik({
-      initialValues: signupValues,
-      validationSchema: signupSchema,
+      initialValues: addBankValues,
+      validationSchema: addBankSchema,
       validateOnChange: true,
       validateOnBlur: false,
 
       onSubmit: async (values, action) => {
         setLoading(true);
-        // try {
-        //   // API call to login using Axios interceptor
-        //   const response = await authentication.post("/auth/brokerSignIn", {
-        //     email: values.email,
-        //     password: values.password,
-        //   });
-
-        //   if (response?.status == 200 && response?.data?.token !== null) {
-        //     localStorage.setItem("token", response?.data?.token);
-        //     localStorage.setItem(
-        //       "broker",
-        //       JSON.stringify(response?.data?.data)
-        //     );
-        //     navigate("Home", "/home");
-        //   }
-        // } catch (error) {
-        //   console.log(error);
-        //   // Handle errors (e.g., show error message)
-        //   setError(error?.response?.data?.message);
-        // } finally {
-        //   // console.error("Login failed:", error.response?.data);
-        //   setLoading(false);
-        // }
-        setTimeout(() => {
-          navigate("Verify Email Otp", "verify-otp-email");
-          setLoading(false);
-        }, 2000);
+        const headers = {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        };
+        // API call to login using Axios interceptor
+        axios
+          .post(
+            "https://backend.faresharellc.com/finance/banks",
+            {
+              accountNumber: values.accountNumber,
+              accountHolderName: values.accountHolderName,
+              routingNumber: values.routingNumber,
+            },
+            { headers }
+          )
+          .then((response) => {
+            if (response?.data?.success) {
+              setSuccess(true);
+            }
+          })
+          .catch((error) => {
+            setError(error?.response?.data?.message);
+          });
       },
     });
   return (
     <section class="bg-white ">
+      {success && <FinalSuccess />}
       <div class="flex justify-center min-h-screen">
         <div class="hidden  h-screen lg:flex justify-center items-center bg-cover  lg:w-2/5">
           <div class="w-full h-full  flex items-center justify-center animate one text-4xl font-bold text-[#c00000]">
@@ -83,13 +83,13 @@ const AddBank = () => {
             <Error error={error} setError={setError} />
 
             <div className="w-full flex justify-center items-center">
-              <Link
+              {/* <Link
                 to={"/add-card"}
                 className="w-10 h-10 mr-auto rounded-full flex justify-center items-center text-md bg-[#c00000] text-white"
               >
                 <FaArrowLeft />
-              </Link>
-              <h1 class="text-[17px] mr-auto lg:text-[24px] font-semibold text-center tracking-tight text-gray-800 capitalize ">
+              </Link> */}
+              <h1 class="text-[17px]  lg:text-[24px] font-semibold text-center tracking-tight text-gray-800 capitalize ">
                 Bank details{" "}
               </h1>
             </div>
@@ -104,49 +104,25 @@ const AddBank = () => {
               <div className="w-full flex flex-col  gap-4 ">
                 <div>
                   <label class="block mb-1 text-sm text-gray-500 font-medium ml-1 ">
-                    Bank Name
-                  </label>
-                  <input
-                    type="text"
-                    id="email"
-                    name="email"
-                    value={values.email}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    placeholder="Bank Of America"
-                    class={`block w-full px-5 py-3 bg-gray-50  text-gray-700 placeholder-gray-400  border border-gray-200 rounded-2xl   focus:border-[#c00000]  focus:ring-[#c00000] focus:outline-none focus:ring focus:ring-opacity-40 transition-colors duration-300 ${
-                      errors.email && touched.email
-                        ? "border-red-600 shake"
-                        : null
-                    }`}
-                  />
-                  {errors.email && touched.email ? (
-                    <p className="text-red-700 text-sm font-medium">
-                      {errors.email}
-                    </p>
-                  ) : null}
-                </div>
-                <div>
-                  <label class="block mb-1 text-sm text-gray-500 font-medium ml-1 ">
                     Account Holder’s Name
                   </label>
                   <input
                     type="text"
-                    id="email"
-                    name="email"
-                    value={values.email}
+                    id="accountHolderName"
+                    name="accountHolderName"
+                    value={values.accountHolderName}
                     onChange={handleChange}
                     onBlur={handleBlur}
                     placeholder="John Doe"
                     class={`block w-full px-5 py-3 bg-gray-50  text-gray-700 placeholder-gray-400  border border-gray-200 rounded-2xl   focus:border-[#c00000]  focus:ring-[#c00000] focus:outline-none focus:ring focus:ring-opacity-40 transition-colors duration-300 ${
-                      errors.email && touched.email
+                      errors.accountHolderName && touched.accountHolderName
                         ? "border-red-600 shake"
                         : null
                     }`}
                   />
-                  {errors.email && touched.email ? (
+                  {errors.accountHolderName && touched.accountHolderName ? (
                     <p className="text-red-700 text-sm font-medium">
-                      {errors.email}
+                      {errors.accountHolderName}
                     </p>
                   ) : null}
                 </div>
@@ -156,21 +132,21 @@ const AddBank = () => {
                   </label>
                   <input
                     type="text"
-                    id="email"
-                    name="email"
-                    value={values.email}
+                    id="accountNumber"
+                    name="accountNumber"
+                    value={values.accountNumber}
                     onChange={handleChange}
                     onBlur={handleBlur}
                     placeholder="XXXX-XXXX-XXXX"
                     class={`block w-full px-5 py-3 bg-gray-50  text-gray-700 placeholder-gray-400  border border-gray-200 rounded-2xl   focus:border-[#c00000]  focus:ring-[#c00000] focus:outline-none focus:ring focus:ring-opacity-40 transition-colors duration-300 ${
-                      errors.email && touched.email
+                      errors.accountNumber && touched.accountNumber
                         ? "border-red-600 shake"
                         : null
                     }`}
                   />
-                  {errors.email && touched.email ? (
+                  {errors.accountNumber && touched.accountNumber ? (
                     <p className="text-red-700 text-sm font-medium">
-                      {errors.email}
+                      {errors.accountNumber}
                     </p>
                   ) : null}
                 </div>
@@ -180,21 +156,21 @@ const AddBank = () => {
                   </label>
                   <input
                     type="text"
-                    id="email"
-                    name="email"
-                    value={values.email}
+                    id="routingNumber"
+                    name="routingNumber"
+                    value={values.routingNumber}
                     onChange={handleChange}
                     onBlur={handleBlur}
                     placeholder="XXXX-XXXX-XXXX"
                     class={`block w-full px-5 py-3 bg-gray-50  text-gray-700 placeholder-gray-400  border border-gray-200 rounded-2xl   focus:border-[#c00000]  focus:ring-[#c00000] focus:outline-none focus:ring focus:ring-opacity-40 transition-colors duration-300 ${
-                      errors.email && touched.email
+                      errors.routingNumber && touched.routingNumber
                         ? "border-red-600 shake"
                         : null
                     }`}
                   />
-                  {errors.email && touched.email ? (
+                  {errors.routingNumber && touched.routingNumber ? (
                     <p className="text-red-700 text-sm font-medium">
-                      {errors.email}
+                      {errors.routingNumber}
                     </p>
                   ) : null}
                 </div>

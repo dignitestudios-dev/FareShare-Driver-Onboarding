@@ -26,11 +26,47 @@ import { Elements } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
 import PaymentForm from "./PaymentForm";
 import { Card } from "../../assets/export";
+import api from "../../api/apiInterceptor";
 
 const AddCard = () => {
   // Load your Stripe public key
   const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_API_KEY);
-  const { error, setError } = useContext(AppContext);
+  const {
+    error,
+    setError,
+    clientSecret,
+    setClientSecret,
+    paymentIntent,
+    setPaymentIntent,
+  } = useContext(AppContext);
+
+  const [secretLoading, setSecretLoading] = useState(false);
+
+  useEffect(() => {
+    setSecretLoading(true);
+    const headers = {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    };
+    // Fetch the client secret from your backend
+    axios
+      .get("https://backend.faresharellc.com/subscription/createStripeSub", {
+        headers,
+      })
+      .then((response) => {
+        setClientSecret(response?.data?.clientSecret);
+        setPaymentIntent(response?.data?.stripeSubscriptionId);
+        localStorage.setItem(
+          "subscriptionId",
+          response?.data?.stripeSubscriptionId
+        );
+        localStorage.setItem("paymentIntent", response?.data?.paymentIntentId);
+        setSecretLoading(false);
+      })
+      .catch((error) => {
+        setError(error?.response?.data?.message);
+        setSecretLoading(false);
+      }); // Adjust according to your response structure
+  }, []);
 
   return (
     <section class="bg-white ">
@@ -50,13 +86,13 @@ const AddCard = () => {
             <Error error={error} setError={setError} />
 
             <div className="w-full flex justify-center items-center">
-              <Link
+              {/* <Link
                 to={"/add-card"}
                 className="w-10 h-10 mr-auto rounded-full flex justify-center items-center text-md bg-[#c00000] text-white"
               >
                 <FaArrowLeft />
-              </Link>
-              <h1 class="text-[17px] mr-auto lg:text-[24px] font-semibold text-center tracking-tight text-gray-800 capitalize ">
+              </Link> */}
+              <h1 class="text-[17px] lg:text-[24px] font-semibold text-center tracking-tight text-gray-800 capitalize ">
                 Card details{" "}
               </h1>
             </div>
@@ -64,11 +100,32 @@ const AddCard = () => {
               <img src={Card} alt="" />
             </div>
 
-            {
-              <Elements stripe={stripePromise}>
-                <PaymentForm />
-              </Elements>
-            }
+            {secretLoading ? (
+              <div className="flex flex-col gap-4">
+                <div className="bg-gray-300 rounded h-48 w-full animate-pulse"></div>
+                <div className="bg-gray-300 rounded h-10 w-full animate-pulse"></div>
+              </div>
+            ) : (
+              !secretLoading &&
+              clientSecret && (
+                <Elements
+                  stripe={stripePromise}
+                  options={{
+                    clientSecret: clientSecret,
+                    appearance: {
+                      theme: "stripe",
+                      variables: {
+                        colorPrimary: "#c00000",
+                      },
+                    },
+                    // Specify which payment methods you want to include
+                    // payment_method_types: ["card"],
+                  }}
+                >
+                  <PaymentForm />
+                </Elements>
+              )
+            )}
           </div>
         </div>
       </div>
