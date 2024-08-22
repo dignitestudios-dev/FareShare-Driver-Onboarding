@@ -43,6 +43,7 @@ const VerifyOtpEmail = () => {
                 const headers = {
                   Authorization: `Bearer ${localStorage.getItem("token")}`,
                 };
+
                 axios
                   .post(
                     "https://backend.faresharellc.com/auth/sendPhoneOTP",
