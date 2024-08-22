@@ -27,77 +27,38 @@ const SocialLogin = () => {
       setAppleLoading(true);
       const result = await signInWithPopup(auth, appleProvider);
       if (result) {
-        console.log(result);
+        // console.log(result);
         const token = await result?.user?.getIdToken();
         if (token) {
-          axios
-            .post(`https://backend.faresharellc.com/auth/driverSocialSignIn`, {
-              email: result?.user?.email,
-              idToken: token,
-            })
-            .then(
-              (response) => {
-                // just for now
-                Cookies.set("token", response?.data?.data?.token, {
-                  expires: 7,
-                });
-                // if (response?.data?.data?.token) {
-                //   navigate("/home/");
-                // }
-              },
-              (error) => {
-                setError(error?.response?.data?.message);
-
-                // if (error?.response?.data?.message == "No user found") {
-                //   axios
-                //     .post(`https://backend.faresharellc.com/auth/brokerSocialSignIn`, {
-                //       id_token: token,
-                //     })
-                //     .then(
-                //       (response) => {
-                //         console.log(response);
-                //         if (response?.status == 201) {
-                //           axios
-                //             .post(`${baseUrl}/login-social`, {
-                //               id_token: token,
-                //             })
-                //             .then(
-                //               (response) => {
-                //                 // just for now
-                //                 Cookies.set(
-                //                   "token",
-                //                   response?.data?.data?.token,
-                //                   { expires: 7 }
-                //                 );
-                //                 if (response?.data?.data?.token) {
-                //                   navigate("/home/");
-                //                 }
-                //               },
-                //               (error) => {
-                //                 setAppleLoading(false);
-                //                 setFormError(error?.response?.data?.error);
-                //                 console.log(error);
-                //               }
-                //             );
-                //           if (response?.data?.data?.token) {
-                //             navigate("/home/");
-                //           }
-                //         }
-                //       },
-                //       (error) => {
-                //         setAppleLoading(false);
-                //         setFormError(error?.response?.data?.error);
-                //         console.log(error);
-                //       }
-                //     );
-                // }
-                // console.log(error);
-                setAppleLoading(false);
+          try {
+            const email = result?.user?.email;
+            const ip = await authentication.get(
+              "https://api.ipify.org?format=json"
+            );
+            const response = await authentication.post(
+              "/auth/driverSocialSignup",
+              {
+                email: email,
+                idToken: token,
+                ip: ip.data.ip,
               }
             );
+
+            if (response?.data?.success) {
+              localStorage.setItem("token", response?.data?.token);
+              setIsSocialLogin(true);
+              navigate("Complete Profile", "/complete-profile");
+            }
+          } catch (error) {
+            console.log(error);
+            setError(error.response.data.message);
+          } finally {
+            setGoogleLoading(false);
+          }
         }
       }
     } catch (err) {
+      console.log(err);
       setError("Cannot open apple signin modal.");
     }
   };
@@ -138,6 +99,7 @@ const SocialLogin = () => {
         }
       }
     } catch (err) {
+      console.log(err);
       setError("Cannot open google signin modal.");
     } finally {
       setGoogleLoading(false);

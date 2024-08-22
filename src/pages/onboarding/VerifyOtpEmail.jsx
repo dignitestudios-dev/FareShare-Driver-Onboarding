@@ -25,29 +25,41 @@ const VerifyOtpEmail = () => {
       validateOnChange: true,
       validateOnBlur: false,
 
-      onSubmit: async (values, action) => {
+      onSubmit: (values, action) => {
         const email = window.localStorage.getItem("email");
         setLoading(true);
         try {
           const otp = values.otp1 + values.otp2 + values.otp3 + values.otp4;
           // API call to login using Axios interceptor
-          const response = await authentication.post("/auth/validateOTP", {
-            email: email,
-            code: otp,
-          });
-
-          window.localStorage.setItem("token", response?.data?.token);
-          setSuccess("Email  Verified Successfully Successfully.");
-          const phoneResponse = await api.post("/auth/sendPhoneOTP", {
-            phoneNo: window.localStorage.getItem("phone"),
-          });
-          if (phoneResponse) {
-            navigate("Verify Phone Otp", "/verify-otp-phone");
-          }
+          authentication
+            .post("/auth/validateOTP", {
+              email: email,
+              code: otp,
+            })
+            .then((response) => {
+              if (response?.data?.success) {
+                window.localStorage.setItem("token", response?.data?.token);
+                setSuccess("Email  Verified Successfully Successfully.");
+                api
+                  .post("/auth/sendPhoneOTP", {
+                    phoneNo: window.localStorage.getItem("phone"),
+                  })
+                  .then((response) => {
+                    if (response?.data?.success) {
+                      navigate("Verify Phone Otp", "/verify-otp-phone");
+                    }
+                  })
+                  .catch((error) => {
+                    setError(error?.response?.data?.message);
+                  });
+              }
+            })
+            .catch((error) => {
+              setError(error?.response?.data?.message);
+            });
         } catch (error) {
           // Handle errors (e.g., show error message)
-          setError(error?.response?.data?.message);
-
+          // setError(error?.response?.data?.message);
           // console.error("Login failed:", error.response?.data);
         } finally {
           setLoading(false);
