@@ -26,7 +26,7 @@ const VerifyOtpEmail = () => {
       validateOnBlur: false,
 
       onSubmit: async (values, action) => {
-        const email = localStorage.getItem("email");
+        const email = window.localStorage.getItem("email");
         setLoading(true);
         try {
           const otp = values.otp1 + values.otp2 + values.otp3 + values.otp4;
@@ -36,12 +36,12 @@ const VerifyOtpEmail = () => {
             code: otp,
           });
 
-          if (response?.data?.success) {
-            localStorage.setItem("token", response?.data?.token);
-            setSuccess("Email  Verified Successfully Successfully.");
-            const response = await api.post("/auth/sendPhoneOTP", {
-              phoneNo: localStorage.getItem("phone"),
-            });
+          window.localStorage.setItem("token", response?.data?.token);
+          setSuccess("Email  Verified Successfully Successfully.");
+          const phoneResponse = await api.post("/auth/sendPhoneOTP", {
+            phoneNo: window.localStorage.getItem("phone"),
+          });
+          if (phoneResponse) {
             navigate("Verify Phone Otp", "/verify-otp-phone");
           }
         } catch (error) {

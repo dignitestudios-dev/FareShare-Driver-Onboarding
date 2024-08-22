@@ -130,6 +130,7 @@ const SocialLogin = () => {
               navigate("Complete Profile", "/complete-profile");
             }
           } catch (error) {
+            console.log(error);
             setError(error.response.data.message);
           } finally {
             setGoogleLoading(false);
