@@ -57,10 +57,12 @@ const AddBank = () => {
           .then((response) => {
             if (response?.data?.success) {
               setSuccess(true);
+              setLoading(false);
             }
           })
           .catch((error) => {
             setError(error?.response?.data?.message);
+            setLoading(false);
           });
       },
     });
