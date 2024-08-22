@@ -53,7 +53,6 @@ const Signup = () => {
               setLoading(false);
             }
           } catch (error) {
-            console.log(error);
             if (error.code === "auth/email-already-in-use") {
               // Try to sign in the user
               const userCredential = await signInWithEmailAndPassword(

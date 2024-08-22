@@ -1,10 +1,10 @@
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
-const SuccessToast = ({ success, setSucess }) => {
+const SuccessToast = ({ success, setSuccess }) => {
   useEffect(() => {
     setTimeout(() => {
-      setSucess(false);
+      setSuccess(false);
     }, 5000);
   }, [success]);
 

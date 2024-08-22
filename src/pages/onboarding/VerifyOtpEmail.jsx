@@ -11,6 +11,7 @@ import Cookies from "js-cookie";
 import Error from "../../components/app/global/Error";
 import SuccessToast from "../../components/app/global/SuccessToast";
 import api from "../../api/apiInterceptor";
+import axios from "axios";
 
 const VerifyOtpEmail = () => {
   const { navigate, error, setError } = useContext(AppContext);
@@ -36,11 +37,11 @@ const VerifyOtpEmail = () => {
           });
 
           if (response?.data?.success) {
+            localStorage.setItem("token", response?.data?.token);
             setSuccess("Email  Verified Successfully Successfully.");
             const response = await api.post("/auth/sendPhoneOTP", {
               phoneNo: localStorage.getItem("phone"),
             });
-            localStorage.setItem("token", response?.data?.token);
             navigate("Verify Phone Otp", "/verify-otp-phone");
           }
         } catch (error) {
