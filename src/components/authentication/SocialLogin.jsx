@@ -52,6 +52,7 @@ const SocialLogin = () => {
             }
           } catch (error) {
             console.log(error);
+            setFacebookLoading(false);
             setError(error.response.data.message);
           } finally {
             setFacebookLoading(false);
@@ -95,14 +96,17 @@ const SocialLogin = () => {
             }
           } catch (error) {
             console.log(error);
+            setAppleLoading(false);
             setError(error.response.data.message);
           } finally {
-            setGoogleLoading(false);
+            setAppleLoading(false);
           }
         }
       }
     } catch (err) {
       console.log(err);
+      setAppleLoading(false);
+
       setError("Cannot open apple signin modal.");
     }
   };
@@ -136,6 +140,7 @@ const SocialLogin = () => {
             }
           } catch (error) {
             console.log(error);
+            setGoogleLoading(false);
             setError(error.response.data.message);
           } finally {
             setGoogleLoading(false);
@@ -144,6 +149,7 @@ const SocialLogin = () => {
       }
     } catch (err) {
       console.log(err);
+      setGoogleLoading(false);
       setError("Cannot open google signin modal.");
     } finally {
       setGoogleLoading(false);
