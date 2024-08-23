@@ -164,7 +164,7 @@ const SocialLogin = () => {
         type="button"
         onClick={handleGoogleLogin}
         aria-label="Sign in with Google"
-        class="flex items-center justify-center w-full bg-white border border-button-border-light rounded-full p-1 pr-3"
+        class="flex items-center justify-center w-full h-12 bg-white border border-button-border-light rounded-full p-1 pr-3"
       >
         {googleLoading ? (
           <div
@@ -187,7 +187,7 @@ const SocialLogin = () => {
         type="button"
         onClick={handleAppleLogin}
         aria-label="Sign in with Google"
-        class="flex items-center w-full justify-center bg-white border border-button-border-light rounded-full p-1 pr-3"
+        class="flex items-center w-full justify-center h-12 bg-white border border-button-border-light rounded-full p-1 pr-3"
       >
         {appleLoading ? (
           <div
@@ -222,7 +222,7 @@ const SocialLogin = () => {
         type="button"
         onClick={handleFacebookLogin}
         aria-label="Sign in with Facebook"
-        class="flex items-center justify-center bg-white border border-button-border-light rounded-full p-1 pr-3"
+        class="flex items-center justify-center h-12 bg-white border border-button-border-light rounded-full p-1 pr-3"
       >
         {facebookLoading ? (
           <div
