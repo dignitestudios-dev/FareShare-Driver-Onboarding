@@ -71,6 +71,8 @@ const SocialLogin = () => {
     try {
       setAppleLoading(true);
       const result = await signInWithPopup(auth, appleProvider);
+      const credential = OAuthProvider.credentialFromResult(result);
+      const token = credential.accessToken;
       if (result) {
         // console.log(result);
         const token = await result?.user?.getIdToken();
