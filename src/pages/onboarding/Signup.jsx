@@ -22,6 +22,7 @@ import {
 } from "firebase/auth";
 import { useEffect } from "react";
 import SocialSignupModal from "../../components/authentication/SocialSignupModal";
+import { FaRegEyeSlash, FaRegEye } from "react-icons/fa";
 
 const Signup = () => {
   const { navigate, error, setError } = useContext(AppContext);
@@ -117,6 +118,9 @@ const Signup = () => {
   useEffect(() => {
     sendDataToBackend();
   }, [idToken]);
+
+  const [isShow, setIsShow] = useState(false);
+  const [isConfirmShow, setIsConfirmShow] = useState(false);
   return (
     <section class="bg-white ">
       <div class="flex justify-center min-h-screen">
@@ -213,21 +217,33 @@ const Signup = () => {
                   ) : null}
                 </div>
 
-                <div class="w-full">
-                  <input
-                    type="password"
-                    name="password"
-                    id="password"
-                    value={values.password}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    placeholder="Your Password"
-                    class={`block w-full px-5 py-3 mt-1.5 text-gray-700 placeholder-gray-400 bg-gray-50 border border-gray-200 rounded-full   focus:border-[#c00000]  focus:ring-[#c00000] focus:outline-none focus:ring focus:ring-opacity-40  transition-colors duration-300 ${
-                      errors.password && touched.password
-                        ? "border-red-600 shake"
-                        : null
-                    }`}
-                  />
+                <div class="w-full ">
+                  <div className="w-full relative">
+                    <input
+                      type={isShow ? "text" : "password"}
+                      name="password"
+                      id="password"
+                      value={values.password}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      placeholder="Your Password"
+                      class={`block w-full px-5 py-3 mt-1.5 text-gray-700 placeholder-gray-400 bg-gray-50 border border-gray-200 rounded-full   focus:border-[#c00000]  focus:ring-[#c00000] focus:outline-none focus:ring focus:ring-opacity-40  transition-colors duration-300 ${
+                        errors.password && touched.password
+                          ? "border-red-600 shake"
+                          : null
+                      }`}
+                    />
+                    {
+                      <button
+                        type="button"
+                        onClick={() => setIsShow((prev) => !prev)}
+                        className="absolute top-[calc(50%-8px)] text-gray-500 text-md right-3"
+                      >
+                        {isShow ? <FaRegEyeSlash /> : <FaRegEye />}
+                      </button>
+                    }
+                  </div>
+
                   {errors.password && touched.password ? (
                     <p className="text-red-700 text-sm ml-1 font-medium">
                       {errors.password}
@@ -236,20 +252,31 @@ const Signup = () => {
                 </div>
 
                 <div class="w-full">
-                  <input
-                    type="password"
-                    name="confirmPassword"
-                    id="confirmPassword"
-                    value={values.confirmPassword}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    placeholder="Confirm Password"
-                    class={`block w-full px-5 py-3 mt-1.5 text-gray-700 placeholder-gray-400 bg-gray-50 border border-gray-200 rounded-full   focus:border-[#c00000]  focus:ring-[#c00000] focus:outline-none focus:ring focus:ring-opacity-40  transition-colors duration-300 ${
-                      errors.confirmPassword && touched.confirmPassword
-                        ? "border-red-600 shake"
-                        : null
-                    }`}
-                  />
+                  <div className="w-full relative">
+                    <input
+                      type={isConfirmShow ? "text" : "password"}
+                      name="confirmPassword"
+                      id="confirmPassword"
+                      value={values.confirmPassword}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      placeholder="Confirm Password"
+                      class={`block w-full px-5 py-3 mt-1.5 text-gray-700 placeholder-gray-400 bg-gray-50 border border-gray-200 rounded-full   focus:border-[#c00000]  focus:ring-[#c00000] focus:outline-none focus:ring focus:ring-opacity-40  transition-colors duration-300 ${
+                        errors.confirmPassword && touched.confirmPassword
+                          ? "border-red-600 shake"
+                          : null
+                      }`}
+                    />
+                    {
+                      <button
+                        type="button"
+                        onClick={() => setIsConfirmShow((prev) => !prev)}
+                        className="absolute top-[calc(50%-8px)] text-gray-500 text-md right-3"
+                      >
+                        {isConfirmShow ? <FaRegEyeSlash /> : <FaRegEye />}
+                      </button>
+                    }
+                  </div>
                   {errors.confirmPassword && touched.confirmPassword ? (
                     <p className="text-red-700 text-sm ml-1 font-medium">
                       {errors.confirmPassword}

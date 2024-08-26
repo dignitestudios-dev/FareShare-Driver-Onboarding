@@ -307,7 +307,7 @@ const AddVehicle = () => {
                     value={values.modelYear}
                     onChange={handleChange}
                     onBlur={handleBlur}
-                    placeholder="Corolla/2024"
+                    placeholder="2024"
                     class={`block w-full px-5 py-3  text-gray-700 placeholder-gray-400 bg-gray-50 border border-gray-200 rounded-2xl   focus:border-[#c00000]  focus:ring-[#c00000] focus:outline-none focus:ring focus:ring-opacity-40 transition-colors duration-300 ${
                       errors.modelYear && touched.modelYear
                         ? "border-red-600 shake"
