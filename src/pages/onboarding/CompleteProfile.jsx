@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useEffect, useRef } from "react";
 import { FaApple, FaArrowLeft, FaFacebook, FaFacebookF } from "react-icons/fa";
 import { FiUser } from "react-icons/fi";
 import { TiUserAddOutline } from "react-icons/ti";
@@ -19,6 +19,7 @@ import { completeProfileValues } from "../../data/profile/completeProfile";
 import { completeProfileSchema } from "../../schema/profile/completeProfileSchema";
 import { FaCircleCheck } from "react-icons/fa6";
 import api from "../../api/apiInterceptor";
+import { IoMdClose } from "react-icons/io";
 
 const CompleteProfile = () => {
   const { navigate, error, setError, isSocialLogin } = useContext(AppContext);
@@ -79,8 +80,9 @@ const CompleteProfile = () => {
     }
   };
 
+  const buttonRef = useRef();
+
   const handleProfileClick = (e) => {
-    e.preventDefault();
     document.getElementById("profilePicture").click();
   };
 
@@ -169,6 +171,17 @@ const CompleteProfile = () => {
   //   setPhone(values?.phone ? values?.phone : "");
   //   setReferal(values?.referal ? values?.referal : "");
   // }, []);
+
+  function getEighteenYearsAgo() {
+    const today = new Date();
+    const eighteenYearsAgo = new Date(
+      today.setFullYear(today.getFullYear() - 18)
+    );
+    const year = eighteenYearsAgo.getFullYear();
+    const month = (eighteenYearsAgo.getMonth() + 1).toString().padStart(2, "0");
+    const day = eighteenYearsAgo.getDate().toString().padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  }
   return (
     <section class="bg-white ">
       <div class="flex justify-center min-h-screen">
@@ -207,7 +220,7 @@ const CompleteProfile = () => {
                   <button
                     type="button"
                     onClick={handleProfileClick}
-                    className={`w-[100px] h-[100px] rounded-full bg-gray-50 border  text-[#c00000] flex justify-center items-center text-2xl font-medium transition-all duration-500 ${
+                    className={`w-[100px]  h-[100px] relative rounded-full bg-gray-50 border  text-[#c00000] flex justify-center items-center text-2xl font-medium transition-all duration-500 ${
                       touched.profilePicture && errors.profilePicture
                         ? "border-[#c00000] shake"
                         : "border-gray-200"
@@ -221,12 +234,28 @@ const CompleteProfile = () => {
                     ) : (
                       <GoPlus />
                     )}
+                    {profileBase && (
+                      <button
+                        type="button"
+                        ref={buttonRef}
+                        onClick={() => {
+                          setProfilePicture(null);
+                          setProfileBase(null);
+                          values.profilePicture = null;
+                        }}
+                        className="absolute bottom-1 w-6 h-6  flex justify-center items-center right-1 p-2 bg-red-500 text-white rounded-full"
+                        aria-label="Remove image"
+                      >
+                        <IoMdClose />
+                      </button>
+                    )}
                   </button>
                   <input
                     type="file"
                     id="profilePicture"
                     name="profilePicture"
                     accept="image/*"
+                    capture="user"
                     className="hidden"
                     onBlur={handleBlur}
                     onChange={(e) => {
@@ -234,6 +263,7 @@ const CompleteProfile = () => {
                       handleChange(e);
                     }}
                   />
+
                   <span className="text-xs text-[#c00000] font-medium">
                     Upload Profile Photo
                   </span>
@@ -343,8 +373,11 @@ const CompleteProfile = () => {
                 </div>
 
                 <div>
-                  <label class="block mb-1 text-sm text-gray-500 font-medium ml-1 ">
+                  <label class="mb-1 flex justify-start items-center gap-1  text-sm text-gray-500 font-medium ml-1 ">
                     Date of Birth{" "}
+                    <p className="text-gray-800">
+                      ( You must have to be 18 years old to register. )
+                    </p>
                   </label>
                   <input
                     type="date"
@@ -353,6 +386,7 @@ const CompleteProfile = () => {
                     value={values.dateOfBirth}
                     onChange={handleChange}
                     onBlur={handleBlur}
+                    max={getEighteenYearsAgo()}
                     placeholder="12/04/2024"
                     class={`block w-full px-5 py-3  text-gray-700 placeholder-gray-400 bg-gray-50 border border-gray-200 rounded-2xl   focus:border-[#c00000]  focus:ring-[#c00000] focus:outline-none focus:ring focus:ring-opacity-40 transition-colors duration-300 ${
                       errors.dateOfBirth && touched.dateOfBirth
@@ -360,6 +394,7 @@ const CompleteProfile = () => {
                         : null
                     }`}
                   />
+
                   {errors.dateOfBirth && touched.dateOfBirth ? (
                     <p className="text-red-700 text-sm font-medium">
                       {errors.dateOfBirth}
@@ -595,7 +630,7 @@ const CompleteProfile = () => {
 
                 <div className="w-full grid grid-cols-2 gap-2">
                   <div className="w-full h-aut0 flex flex-col justify-start items-start gap-1">
-                    <div className="h-[139px] bg-gray-50 rounded-2xl border border-gray-200 p-3 w-full flex flex-col gap-2 justify-center items-center">
+                    <div className="h-[139px] relative bg-gray-50 rounded-2xl border border-gray-200 p-3 w-full flex flex-col gap-2 justify-center items-center">
                       <div className="w-full flex items-center justify-center gap-1">
                         <span className="w-6 h-6 rounded-full bg-[#c00000] text-white flex items-center justify-center text-xs">
                           <ImProfile />
@@ -611,6 +646,7 @@ const CompleteProfile = () => {
                       <input
                         type="file"
                         id="socialSecurityCardFront"
+                        capture="environment"
                         name="socialSecurityCardFront"
                         accept="image/*"
                         className="hidden"
@@ -641,6 +677,20 @@ const CompleteProfile = () => {
                           </>
                         )}
                       </button>
+                      {socialBase && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSocial(null);
+                            setSocialBase(null);
+                            values.socialSecurityCardFront = null;
+                          }}
+                          className="absolute top-2 w-6 h-6  flex justify-center items-center right-2 p-2 bg-red-500 text-white rounded-full"
+                          aria-label="Remove image"
+                        >
+                          <IoMdClose />
+                        </button>
+                      )}
                     </div>
                     {errors.socialSecurityCardFront &&
                     touched.socialSecurityCardFront ? (
@@ -650,7 +700,7 @@ const CompleteProfile = () => {
                     ) : null}
                   </div>
                   <div className="w-full h-aut0 flex flex-col justify-start items-start gap-1">
-                    <div className="h-[139px] bg-gray-50 rounded-2xl border border-gray-200 p-3 w-full flex flex-col gap-2 justify-center items-center">
+                    <div className="h-[139px] relative bg-gray-50 rounded-2xl border border-gray-200 p-3 w-full flex flex-col gap-2 justify-center items-center">
                       <div className="w-full flex items-center justify-center gap-1">
                         <span className="w-6 h-6 rounded-full bg-[#c00000] text-white flex items-center justify-center text-xs">
                           <ImProfile />
@@ -665,6 +715,7 @@ const CompleteProfile = () => {
                         name="socialSecurityCardBack"
                         accept="image/*"
                         className="hidden"
+                        capture="environment"
                         onBlur={handleBlur}
                         onChange={(e) => {
                           handleSocialBackChange(e);
@@ -695,6 +746,21 @@ const CompleteProfile = () => {
                           </>
                         )}
                       </button>
+
+                      {socialBackBase && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSocialBack(null);
+                            setSocialBackBase(null);
+                            values.socialSecurityCardBack = null;
+                          }}
+                          className="absolute top-2 w-6 h-6  flex justify-center items-center right-2 p-2 bg-red-500 text-white rounded-full"
+                          aria-label="Remove image"
+                        >
+                          <IoMdClose />
+                        </button>
+                      )}
                     </div>
                     {errors.socialSecurityCardBack &&
                     touched.socialSecurityCardBack ? (

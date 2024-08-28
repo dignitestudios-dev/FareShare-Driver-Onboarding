@@ -21,7 +21,7 @@ import { Link } from "react-router-dom";
 import { ImProfile } from "react-icons/im";
 import { AiOutlinePlusCircle } from "react-icons/ai";
 import { GoPlus } from "react-icons/go";
-import { IoIosArrowRoundForward } from "react-icons/io";
+import { IoIosArrowRoundForward, IoMdClose } from "react-icons/io";
 import { addVehicle } from "../../data/profile/addVehicle";
 import { vehicleSchema } from "../../schema/profile/addVehicleSchema";
 import api from "../../api/apiInterceptor";
@@ -178,6 +178,15 @@ const AddVehicle = () => {
         }
       },
     });
+
+  function getSixMonthsFromToday() {
+    const today = new Date();
+    today.setMonth(today.getMonth() + 6);
+    const year = today.getFullYear();
+    const month = (today.getMonth() + 1).toString().padStart(2, "0");
+    const day = today.getDate().toString().padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  }
 
   return (
     <section class="bg-white ">
@@ -366,7 +375,7 @@ const AddVehicle = () => {
                 </div>
                 <div className="w-full grid grid-cols-2 gap-2">
                   <div className="w-full h-auto flex flex-col justify-start items-start gap-1">
-                    <div className="h-[139px] rounded-2xl border border-gray-200 bg-gray-50 p-3 w-full flex flex-col gap-2 justify-center items-center">
+                    <div className="h-[139px] rounded-2xl border border-gray-200 bg-gray-50 p-3 w-full flex flex-col gap-2 justify-center items-center relative">
                       <div className="w-full flex items-center justify-center gap-1">
                         <span className="w-6 h-6 rounded-full bg-[#c00000] text-white flex items-center justify-center text-xs">
                           <ImProfile />
@@ -399,6 +408,21 @@ const AddVehicle = () => {
                           </>
                         )}
                       </button>
+                      {licenseFrontBase && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setLicenseFront(null);
+                            setLicenseFrontBase(null);
+                            values.driverLicenseCardFront = null;
+                          }}
+                          className="absolute top-2 w-6 h-6  flex justify-center items-center right-2 p-2 bg-red-500 text-white rounded-full"
+                          aria-label="Remove image"
+                        >
+                          <IoMdClose />
+                        </button>
+                      )}
+
                       <input
                         type="file"
                         id="driverLicenseCardFront"
@@ -420,7 +444,7 @@ const AddVehicle = () => {
                     ) : null}
                   </div>
                   <div className="w-full h-auto flex flex-col gap-1 justify-start items-start">
-                    <div className="h-[139px] rounded-2xl border  border-gray-200 bg-gray-50 p-3 w-full flex flex-col gap-2 justify-center items-center">
+                    <div className="h-[139px] relative rounded-2xl border  border-gray-200 bg-gray-50 p-3 w-full flex flex-col gap-2 justify-center items-center">
                       <div className="w-full flex items-center justify-center gap-1">
                         <span className="w-6 h-6 rounded-full bg-[#c00000] text-white flex items-center justify-center text-xs">
                           <ImProfile />
@@ -432,7 +456,20 @@ const AddVehicle = () => {
                       <span className="text-[12px] font-[510] text-black">
                         Back
                       </span>
-
+                      {licenseBackBase && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setLicenseBack(null);
+                            setLicenseBackBase(null);
+                            values.driverLicenseCardBack = null;
+                          }}
+                          className="absolute top-2 w-6 h-6  flex justify-center items-center right-2 p-2 bg-red-500 text-white rounded-full"
+                          aria-label="Remove image"
+                        >
+                          <IoMdClose />
+                        </button>
+                      )}
                       <buttton
                         onClick={handleLicenseBack}
                         className="w-full flex items-center justify-center gap-2 text-black"
@@ -447,7 +484,7 @@ const AddVehicle = () => {
                         ) : (
                           <>
                             <AiOutlinePlusCircle />
-                            <span className="text-[12px] underline underline-offset-2 font-bold text-black">
+                            <span className="text-[12px]  cursor-pointer underline underline-offset-2 font-bold text-black">
                               Add Documents
                             </span>
                           </>
@@ -476,8 +513,11 @@ const AddVehicle = () => {
                 </div>
 
                 <div>
-                  <label class="block mb-1 text-sm text-gray-500 font-medium ml-1 ">
+                  <label class="flex justify-start items-center gap-1 mb-1 text-sm text-gray-500 font-medium ml-1 ">
                     Expiration Date
+                    <p className="text-gray-800">
+                      ( You can only select a date that is 6 months ahead. )
+                    </p>
                   </label>
                   <input
                     type="date"
@@ -486,6 +526,7 @@ const AddVehicle = () => {
                     value={values.driverLicenseExpiryDate}
                     onChange={handleChange}
                     onBlur={handleBlur}
+                    min={getSixMonthsFromToday()}
                     placeholder="johnsnow@example.com"
                     class={`block w-full px-5 py-3  text-gray-700 placeholder-gray-400 bg-gray-50 border border-gray-200 rounded-2xl   focus:border-[#c00000]  focus:ring-[#c00000] focus:outline-none focus:ring focus:ring-opacity-40 transition-colors duration-300 ${
                       errors.driverLicenseExpiryDate &&
@@ -502,7 +543,7 @@ const AddVehicle = () => {
                   ) : null}
                 </div>
                 <div className="w-full h-auto flex flex-col gap-1 justify-start items-start">
-                  <div className="h-[139px] bg-gray-50 rounded-2xl border border-gray-200 p-3 w-full flex flex-col gap-2 justify-center items-center">
+                  <div className="h-[139px] relative bg-gray-50 rounded-2xl border border-gray-200 p-3 w-full flex flex-col gap-2 justify-center items-center">
                     <div className="w-full flex items-center justify-center gap-1">
                       <span className="w-6 h-6 rounded-full bg-[#c00000] text-white flex items-center justify-center text-xs">
                         <ImProfile />
@@ -535,6 +576,20 @@ const AddVehicle = () => {
                         </>
                       )}
                     </button>
+                    {proofBase && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setProof(null);
+                          setProofBase(null);
+                          values.proofInsurance = null;
+                        }}
+                        className="absolute top-2 w-6 h-6  flex justify-center items-center right-2 p-2 bg-red-500 text-white rounded-full"
+                        aria-label="Remove image"
+                      >
+                        <IoMdClose />
+                      </button>
+                    )}
                     <input
                       type="file"
                       id="proofInsurance"
@@ -555,8 +610,11 @@ const AddVehicle = () => {
                   ) : null}
                 </div>
                 <div>
-                  <label class="block mb-1 text-sm text-gray-500 font-medium ml-1 ">
+                  <label class="flex justify-start items-center gap-1 mb-1 text-sm text-gray-500 font-medium ml-1 ">
                     Expiration Date
+                    <p className="text-gray-800">
+                      ( You can only select a date that is 6 months ahead. )
+                    </p>
                   </label>
                   <input
                     type="date"
@@ -566,6 +624,7 @@ const AddVehicle = () => {
                     onChange={handleChange}
                     onBlur={handleBlur}
                     placeholder="johnsnow@example.com"
+                    min={getSixMonthsFromToday()}
                     class={`block w-full px-5 py-3  text-gray-700 placeholder-gray-400 bg-gray-50 border border-gray-200 rounded-2xl   focus:border-[#c00000]  focus:ring-[#c00000] focus:outline-none focus:ring focus:ring-opacity-40 transition-colors duration-300 ${
                       errors.proofInsuranceExpiryDate &&
                       touched.proofInsuranceExpiryDate
@@ -581,7 +640,7 @@ const AddVehicle = () => {
                   ) : null}
                 </div>
                 <div className="w-full h-auto flex flex-col gap-1 justify-start items-start">
-                  <div className="h-[139px] rounded-2xl bg-gray-50 border border-gray-200 p-3 w-full flex flex-col gap-2 justify-center items-center">
+                  <div className="h-[139px] relative rounded-2xl bg-gray-50 border border-gray-200 p-3 w-full flex flex-col gap-2 justify-center items-center">
                     <div className="w-full flex items-center justify-center gap-1">
                       <span className="w-6 h-6 rounded-full bg-[#c00000] text-white flex items-center justify-center text-xs">
                         <ImProfile />
@@ -614,6 +673,20 @@ const AddVehicle = () => {
                         </>
                       )}
                     </button>
+                    {registrationBase && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setRegistration(null);
+                          setRegistrationBase(null);
+                          values.vehicleRegistrationCard = null;
+                        }}
+                        className="absolute top-2 w-6 h-6  flex justify-center items-center right-2 p-2 bg-red-500 text-white rounded-full"
+                        aria-label="Remove image"
+                      >
+                        <IoMdClose />
+                      </button>
+                    )}
 
                     <input
                       type="file"
@@ -637,8 +710,11 @@ const AddVehicle = () => {
                 </div>
 
                 <div>
-                  <label class="block mb-1 text-sm text-gray-500 font-medium ml-1 ">
+                  <label class="flex justify-start items-center gap-1 mb-1 text-sm text-gray-500 font-medium ml-1 ">
                     Expiration Date
+                    <p className="text-gray-800">
+                      ( You can only select a date that is 6 months ahead. )
+                    </p>
                   </label>
                   <input
                     type="date"
@@ -647,6 +723,7 @@ const AddVehicle = () => {
                     value={values.vehicleRegistrationExpiryDate}
                     onChange={handleChange}
                     onBlur={handleBlur}
+                    min={getSixMonthsFromToday()}
                     placeholder="johnsnow@example.com"
                     class={`block w-full px-5 py-3  text-gray-700 placeholder-gray-400 bg-gray-50 border border-gray-200 rounded-2xl   focus:border-[#c00000]  focus:ring-[#c00000] focus:outline-none focus:ring focus:ring-opacity-40 transition-colors duration-300 ${
                       errors.vehicleRegistrationExpiryDate &&

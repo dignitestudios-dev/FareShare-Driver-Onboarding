@@ -2,7 +2,7 @@ import * as Yup from "yup";
 
 export const signupSchema = Yup.object({
   email: Yup.string().email().required("Please enter your email"),
-  phoneNo: Yup.string().min(12).required("Please enter your phone number"),
+  phoneNo: Yup.string().min(10).required("Please enter your phone number"),
   password: Yup.string()
     .min(8, "Password must be at least 8 characters long")
     .matches(

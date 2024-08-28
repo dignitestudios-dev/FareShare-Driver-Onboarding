@@ -81,6 +81,14 @@ const Signup = () => {
       },
     });
 
+  const formatPhoneNumber = (phoneNumber) => {
+    const formattedNumber = phoneNumber.replace(
+      /^(\d{3})(\d{3})(\d{4})$/,
+      "($1) $2-$3"
+    );
+    return formattedNumber;
+  };
+
   const sendDataToBackend = async () => {
     if (idToken) {
       setLoading(true);
@@ -90,8 +98,8 @@ const Signup = () => {
         );
         // API call to login using Axios interceptor
         const response = await authentication.post("/auth/driverEmailSignUp", {
-          email: values.email,
-          phoneNo: values.phoneNo,
+          email: values.email.toLowerCase(),
+          phoneNo: "+1" + values.phoneNo,
           password: values.password,
           confirmPassword: values.confirmPassword,
           referalCode: values.referalCode == "" ? null : values.referalCode,
@@ -154,7 +162,7 @@ const Signup = () => {
                     type="text"
                     id="email"
                     name="email"
-                    value={values.email}
+                    value={values.email.toLowerCase()}
                     onChange={handleChange}
                     onBlur={handleBlur}
                     placeholder="Email"
@@ -176,8 +184,8 @@ const Signup = () => {
                     type="text"
                     id="phoneNo"
                     name="phoneNo"
-                    maxLength={12}
-                    value={values.phoneNo}
+                    maxLength={10}
+                    value={formatPhoneNumber(values.phoneNo)}
                     onChange={handleChange}
                     onBlur={handleBlur}
                     placeholder="Phone Number"
@@ -304,11 +312,19 @@ const Signup = () => {
                       class="ms-2 text-xs my-2 font-medium text-gray-600 "
                     >
                       I Accept the{" "}
-                      <Link to={"/"} className="text-[#c00000]">
+                      <Link
+                        to={"https://www.faresharellc.com/terms-and-conditions"}
+                        target="_blank"
+                        className="text-[#c00000]"
+                      >
                         Terms & Conditions
                       </Link>{" "}
                       and{" "}
-                      <Link to={"/"} className="text-[#c00000]">
+                      <Link
+                        to={"https://www.faresharellc.com/privacy-policy"}
+                        target="_blank"
+                        className="text-[#c00000]"
+                      >
                         Privacy Policy
                       </Link>
                     </label>

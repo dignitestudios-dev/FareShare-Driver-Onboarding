@@ -1,14 +1,12 @@
-import React, { useContext, useEffect, useState } from "react";
-import { FaArrowLeft } from "react-icons/fa";
+import React, { useContext, useRef, useState } from "react";
 import { GoPlus } from "react-icons/go";
 import { AppContext } from "../../context/AppContext";
 import { useFormik } from "formik";
-import { Link } from "react-router-dom";
 import { vehicleImagesValues } from "../../data/profile/vehicleImages";
 import { vehicleImagesSchema } from "../../schema/profile/vehicleImagesSchema";
 import Error from "../../components/app/global/Error";
-import api from "../../api/apiInterceptor";
 import axios from "axios";
+import { IoMdClose } from "react-icons/io";
 
 const UploadVehicleImages = () => {
   const { navigate, error, setError, setIsUploaded, setVehicle_id } =
@@ -45,6 +43,12 @@ const UploadVehicleImages = () => {
     }
   };
 
+  // Handle image removal
+  const handleRemoveImage = (key) => {
+    setImagePreviews((prev) => ({ ...prev, [key]: null }));
+    setImageFiles((prev) => ({ ...prev, [key]: null }));
+  };
+
   // Initialize formik for form handling
   const { handleBlur, handleChange, handleSubmit, errors, touched } = useFormik(
     {
@@ -54,24 +58,9 @@ const UploadVehicleImages = () => {
         setLoading(true);
 
         const formdata = new FormData();
-        formdata.append("vehicleImageFront", imageFiles.vehicleImageFront);
-        formdata.append("vehicleImageRear", imageFiles.vehicleImageRear);
-        formdata.append(
-          "vehicleImagePassengerSide",
-          imageFiles.vehicleImagePassengerSide
-        );
-        formdata.append(
-          "vehicleImageDriverSide",
-          imageFiles.vehicleImageDriverSide
-        );
-        formdata.append(
-          "vehicleImageInteriorFront",
-          imageFiles.vehicleImageInteriorFront
-        );
-        formdata.append(
-          "vehicleImageInteriorBack",
-          imageFiles.vehicleImageInteriorBack
-        );
+        for (const [key, file] of Object.entries(imageFiles)) {
+          if (file) formdata.append(key, file);
+        }
 
         try {
           const headers = {
@@ -96,6 +85,17 @@ const UploadVehicleImages = () => {
     }
   );
 
+  const imageKeys = [
+    "vehicleImageFront",
+    "vehicleImageRear",
+    "vehicleImagePassengerSide",
+    "vehicleImageDriverSide",
+    "vehicleImageInteriorFront",
+    "vehicleImageInteriorBack",
+  ];
+
+  const buttonRef = useRef();
+
   return (
     <section className="bg-white">
       <div className="flex justify-center min-h-screen">
@@ -114,12 +114,6 @@ const UploadVehicleImages = () => {
             <Error error={error} setError={setError} />
 
             <div className="w-full flex justify-center items-center">
-              {/* <Link
-                to={"/add-vehicle"}
-                className="w-10 h-10 mr-auto rounded-full flex justify-center items-center text-md bg-[#c00000] text-white"
-              >
-                <FaArrowLeft />
-              </Link> */}
               <h1 className="text-[17px] lg:text-[24px] font-semibold text-center text-gray-800">
                 Upload vehicle images
               </h1>
@@ -129,28 +123,37 @@ const UploadVehicleImages = () => {
               onSubmit={handleSubmit}
               className="w-full flex flex-col gap-6 mt-8"
             >
-              {[
-                "vehicleImageFront",
-                "vehicleImageRear",
-                "vehicleImagePassengerSide",
-                "vehicleImageDriverSide",
-                "vehicleImageInteriorFront",
-                "vehicleImageInteriorBack",
-              ].map((imageKey) => (
+              {imageKeys.map((imageKey) => (
                 <div
                   key={imageKey}
-                  className="w-full flex flex-col gap-1 justify-center items-center"
+                  className="w-full flex flex-col gap-1 justify-center items-center relative"
                 >
                   <button
                     type="button"
-                    onClick={() => document.getElementById(imageKey).click()}
+                    onClick={() => {
+                      if (!buttonRef[imageKey]?.current?.contains(e.target)) {
+                        document.getElementById(imageKey).click();
+                      }
+                    }}
                     className="w-full h-[136px] bg-gray-50 rounded-2xl border border-dashed border-[#c00000] text-[#c00000] flex gap-1 flex-col justify-center items-center text-2xl font-medium"
                   >
                     {imagePreviews[imageKey] ? (
-                      <img
-                        src={imagePreviews[imageKey]}
-                        className="w-full h-full rounded-2xl"
-                      />
+                      <>
+                        <img
+                          src={imagePreviews[imageKey]}
+                          className="w-full h-full rounded-2xl object-contain"
+                          alt={`Preview of ${imageKey}`}
+                        />
+                        <button
+                          type="button"
+                          ref={buttonRef[imageKey]}
+                          onClick={() => handleRemoveImage(imageKey)}
+                          className="absolute top-2 w-6 h-6  flex justify-center items-center right-2 p-2 bg-red-500 text-white rounded-full"
+                          aria-label="Remove image"
+                        >
+                          <IoMdClose />
+                        </button>
+                      </>
                     ) : (
                       <>
                         <GoPlus />
