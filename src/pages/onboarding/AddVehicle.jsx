@@ -222,7 +222,7 @@ const AddVehicle = () => {
               class="w-full flex flex-col gap-6 mt-8 "
             >
               <div className="w-full flex flex-col  gap-4 ">
-                <div className="w-full flex flex-col gap-1 justify-center items-center">
+                {/* <div className="w-full flex flex-col gap-1 justify-center items-center">
                   <button
                     type="button"
                     onClick={() =>
@@ -253,7 +253,7 @@ const AddVehicle = () => {
                       )}
                     </div>
                   </button>
-                </div>
+                </div> */}
 
                 <div>
                   <label class="block mb-1 text-sm text-gray-500 font-medium ml-1 ">
