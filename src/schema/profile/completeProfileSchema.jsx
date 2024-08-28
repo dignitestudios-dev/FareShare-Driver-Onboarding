@@ -4,7 +4,7 @@ const SUPPORTED_FORMATS = ["image/jpg", "image/jpeg", "image/png"];
 export const completeProfileSchema = Yup.object({
   firstName: Yup.string().required("Please enter your first name"),
   lastName: Yup.string().required("Please enter your last name"),
-  MI: Yup.string().required("Please enter your MI"),
+  MI: Yup.string(),
   suffix: Yup.string(),
   dateOfBirth: Yup.date().required("Please enter your D.O.B"),
   gender: Yup.string().required("Please select your gender."),

@@ -112,8 +112,8 @@ const CompleteProfile = () => {
           const formdata = new FormData();
           formdata.append("firstName", values.firstName);
           formdata.append("lastName", values.lastName);
-          formdata.append("MI", values.MI);
-          formdata.append("suffix", values.suffix);
+          values?.suffix !== "" && formdata.append("suffix", values.suffix);
+          values?.MI !== "" && formdata.append("MI", values.MI);
           formdata.append("dateOfBirth", values.dateOfBirth);
           formdata.append("gender", values.gender);
           formdata.append("SSN", values.SSN);
