@@ -18,6 +18,12 @@ const Splash = () => {
     if (response?.data?.data?.status == "pending") {
       navigate("/awaiting-approval");
     } else if (
+      response?.data?.data?.status == "pending" &&
+      response?.data?.data?.isSessionComplete == false
+    ) {
+      localStorage.setItem("token", token);
+      navigate("/complete-profile");
+    } else if (
       response?.data?.data?.status == "approved" &&
       response?.data?.data?.isSubscriptionPaid == false
     ) {
