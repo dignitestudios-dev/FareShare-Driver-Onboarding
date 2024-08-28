@@ -646,7 +646,6 @@ const CompleteProfile = () => {
                       <input
                         type="file"
                         id="socialSecurityCardFront"
-                        capture="environment"
                         name="socialSecurityCardFront"
                         accept="image/*"
                         className="hidden"
@@ -715,7 +714,6 @@ const CompleteProfile = () => {
                         name="socialSecurityCardBack"
                         accept="image/*"
                         className="hidden"
-                        capture="environment"
                         onBlur={handleBlur}
                         onChange={(e) => {
                           handleSocialBackChange(e);
