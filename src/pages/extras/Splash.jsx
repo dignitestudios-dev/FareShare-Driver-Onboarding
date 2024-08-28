@@ -15,7 +15,10 @@ const Splash = () => {
     };
     const response = await axios.get(`https://backend.faresharellc.com
 /driver/status/${id}`);
-    if (response?.data?.data?.status == "pending") {
+    if (
+      response?.data?.data?.status == "pending" &&
+      response?.data?.data?.isSessionComplete == true
+    ) {
       navigate("/awaiting-approval");
     } else if (
       response?.data?.data?.status == "pending" &&
