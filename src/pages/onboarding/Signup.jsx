@@ -109,8 +109,8 @@ const Signup = () => {
 
         // Handle the response (e.g., save token, redirect)
         if (response?.data?.success) {
-          localStorage.setItem("email", values?.email);
-          localStorage.setItem("phone", values?.phoneNo);
+          localStorage.setItem("email", values?.email.toLowerCase());
+          localStorage.setItem("phone", "+1" + values?.phoneNo);
           navigate("Verify Otp Email", "/verify-otp-email");
         }
       } catch (error) {
