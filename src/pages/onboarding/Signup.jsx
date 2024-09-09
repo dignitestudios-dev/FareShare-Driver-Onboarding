@@ -234,7 +234,7 @@ const Signup = () => {
                       value={values.password}
                       onChange={handleChange}
                       onBlur={handleBlur}
-                      placeholder="Your Password"
+                      placeholder="Create Password"
                       class={`block w-full px-5 py-3 mt-1.5 text-gray-700 placeholder-gray-400 bg-gray-50 border border-gray-200 rounded-full   focus:border-[#c00000]  focus:ring-[#c00000] focus:outline-none focus:ring focus:ring-opacity-40  transition-colors duration-300 ${
                         errors.password && touched.password
                           ? "border-red-600 shake"
@@ -305,7 +305,7 @@ const Signup = () => {
                       maxLength={12}
                       onChange={handleChange}
                       onBlur={handleBlur}
-                      class="w-3 h-3 text-[#c00000] bg-gray-100 border-gray-300 rounded focus:ring-[#c00000] accent-[#c00000]  focus:ring-2"
+                      class="w-3 h-3 text-[#c00000]  bg-gray-100 border-gray-300 rounded  accent-[#c00000]  outline-none cursor-pointer"
                     />
                     <label
                       htmlFor="accept"

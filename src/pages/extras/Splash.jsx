@@ -13,8 +13,9 @@ const Splash = () => {
     const headers = {
       Authorization: `Bearer ${token}`,
     };
-    const response = await axios.get(`https://backend.faresharellc.com
-/driver/status/${id}`);
+    const response = await axios.get(
+      `https://backend.faresharellc.com/driver/status/${id}`
+    );
     if (
       response?.data?.data?.status == "pending" &&
       response?.data?.data?.isSessionComplete == true

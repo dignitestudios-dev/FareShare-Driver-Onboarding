@@ -229,7 +229,7 @@ const CompleteProfile = () => {
                     {profileBase ? (
                       <img
                         src={profileBase}
-                        className="w-full h-full rounded-full"
+                        className="w-full h-full object-contain rounded-full"
                       />
                     ) : (
                       <GoPlus />
@@ -440,6 +440,7 @@ const CompleteProfile = () => {
                     type="text"
                     id="SSN"
                     name="SSN"
+                    maxLength={9}
                     value={values.SSN}
                     onChange={handleChange}
                     onBlur={handleBlur}

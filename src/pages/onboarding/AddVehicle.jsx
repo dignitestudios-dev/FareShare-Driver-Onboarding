@@ -266,7 +266,7 @@ const AddVehicle = () => {
                     value={values.vehicleMake}
                     onChange={handleChange}
                     onBlur={handleBlur}
-                    placeholder="Toyotta"
+                    placeholder="Toyota"
                     class={`block w-full px-5 py-3 bg-gray-50  text-gray-700 placeholder-gray-400  border border-gray-200 rounded-2xl   focus:border-[#c00000]  focus:ring-[#c00000] focus:outline-none focus:ring focus:ring-opacity-40 transition-colors duration-300 ${
                       errors.vehicleMake && touched.vehicleMake
                         ? "border-red-600 shake"
@@ -291,7 +291,7 @@ const AddVehicle = () => {
                     value={values.vehicleName}
                     onChange={handleChange}
                     onBlur={handleBlur}
-                    placeholder="John Doe"
+                    placeholder="Corolla"
                     class={`block w-full px-5 py-3  text-gray-700 placeholder-gray-400 bg-gray-50 border border-gray-200 rounded-2xl   focus:border-[#c00000]  focus:ring-[#c00000] focus:outline-none focus:ring focus:ring-opacity-40 transition-colors duration-300 ${
                       errors.vehicleName && touched.vehicleName
                         ? "border-red-600 shake"
