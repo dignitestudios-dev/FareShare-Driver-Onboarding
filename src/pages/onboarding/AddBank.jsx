@@ -164,6 +164,7 @@ const AddBank = () => {
                     value={values.routingNumber}
                     onChange={handleChange}
                     onBlur={handleBlur}
+                    maxLength={9}
                     placeholder="XXXX-XXXX-XXXX"
                     class={`block w-full px-5 py-3 bg-gray-50  text-gray-700 placeholder-gray-400  border border-gray-200 rounded-2xl   focus:border-[#c00000]  focus:ring-[#c00000] focus:outline-none focus:ring focus:ring-opacity-40 transition-colors duration-300 ${
                       errors.routingNumber && touched.routingNumber
