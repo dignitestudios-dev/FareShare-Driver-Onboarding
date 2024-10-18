@@ -1,7 +1,6 @@
 import Cookies from "js-cookie";
 import axios from "axios";
 
-// axios instance
 const authentication = axios.create({
   baseURL: "https://backend.faresharellc.com",
   // timeout: 2000,
