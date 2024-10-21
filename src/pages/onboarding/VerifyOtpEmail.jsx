@@ -206,7 +206,8 @@ const VerifyOtpEmail = () => {
                                 ? "focus:bg-red-50 border-red-600 shake"
                                 : null
                             }`}
-                            type="text"
+                            type="tel" // Changed from 'text' to 'tel'
+                            inputMode="numeric" // Added inputMode to ensure numeric input
                             name="otp1"
                             placeholder="-"
                             maxLength="1"
