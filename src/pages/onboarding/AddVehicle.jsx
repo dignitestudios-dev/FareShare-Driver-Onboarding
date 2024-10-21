@@ -515,7 +515,7 @@ const AddVehicle = () => {
                 <div>
                   <label class="flex justify-start items-center gap-1 mb-1 text-sm text-gray-500 font-medium ml-1 ">
                     Expiration Date
-                    <p className="text-gray-800">
+                    <p className="text-gray-800 text-xs">
                       ( You can only select a date that is 6 months ahead. )
                     </p>
                   </label>
@@ -612,7 +612,7 @@ const AddVehicle = () => {
                 <div>
                   <label class="flex justify-start items-center gap-1 mb-1 text-sm text-gray-500 font-medium ml-1 ">
                     Expiration Date
-                    <p className="text-gray-800">
+                    <p className="text-gray-800 text-xs">
                       ( You can only select a date that is 6 months ahead. )
                     </p>
                   </label>
@@ -712,7 +712,7 @@ const AddVehicle = () => {
                 <div>
                   <label class="flex justify-start items-center gap-1 mb-1 text-sm text-gray-500 font-medium ml-1 ">
                     Expiration Date
-                    <p className="text-gray-800">
+                    <p className="text-gray-800 text-xs">
                       ( You can only select a date that is 6 months ahead. )
                     </p>
                   </label>
