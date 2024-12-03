@@ -13,6 +13,15 @@ import { ErrorToast, SuccessToast } from "../../components/global/Toast";
 const VerifyOtpPhone = () => {
   const navigate = useNavigate();
   const { isSocialLogin } = useContext(AppContext);
+  const [hasSociallyLoggedIn, setHasSociallyLoggedIn] = useState(false);
+  useEffect(() => {
+    setHasSociallyLoggedIn(
+      localStorage.getItem("isSocial") &&
+        localStorage.getItem("isSocial") == "yes"
+        ? true
+        : false
+    );
+  }, []);
   const [loading, setLoading] = useState(false);
   const [isChecked, setIsChecked] = useState(false);
   const { values, handleBlur, handleChange, handleSubmit, errors, touched } =
@@ -32,7 +41,7 @@ const VerifyOtpPhone = () => {
           });
           if (response?.status === 200) {
             SuccessToast("Phone OTP Verified successfully.");
-            isSocialLogin
+            hasSociallyLoggedIn
               ? navigate("/upload-vehicle-images")
               : navigate("/complete-profile");
           }

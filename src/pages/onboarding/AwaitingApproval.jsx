@@ -2,6 +2,9 @@ import React, { useEffect } from "react";
 import { Awaiting } from "../../assets/export";
 
 const AwaitingApproval = () => {
+  useEffect(() => {
+    localStorage.removeItem("isSocial");
+  }, []);
   return (
     <div class="w-full  bg-white">
       <div class="grid lg:grid-cols-4 md:grid-cols-3 items-center">

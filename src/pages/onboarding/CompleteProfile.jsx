@@ -20,6 +20,16 @@ import { completeProfileSchema } from "../../schema/profile/completeProfileSchem
 const CompleteProfile = () => {
   const navigate = useNavigate();
   const { isSocialLogin } = useContext(AppContext);
+
+  const [hasSociallyLoggedIn, setHasSociallyLoggedIn] = useState(false);
+  useEffect(() => {
+    setHasSociallyLoggedIn(
+      localStorage.getItem("isSocial") &&
+        localStorage.getItem("isSocial") == "yes"
+        ? true
+        : false
+    );
+  }, []);
   const [loading, setLoading] = useState(false);
   const [profilePicture, setProfilePicture] = useState(null);
   const [profileBase, setProfileBase] = useState(null);
@@ -92,7 +102,7 @@ const CompleteProfile = () => {
 
       onSubmit: async (values, action) => {
         setLoading(true);
-        if (isSocialLogin && phone == "") {
+        if (hasSociallyLoggedIn && phone == "") {
           setPhoneError("Please provide a valid phone number.");
           setLoading(false);
         } else {
@@ -105,8 +115,8 @@ const CompleteProfile = () => {
           formdata.append("gender", values.gender);
           formdata.append("SSN", values.SSN);
           formdata.append("driverLicenseNumber", values.driverLicenseNumber);
-          isSocialLogin && formdata.append("phoneNo", phone);
-          isSocialLogin &&
+          hasSociallyLoggedIn && formdata.append("phoneNo", phone);
+          hasSociallyLoggedIn &&
             referal !== "" &&
             formdata.append("referalCode", referal);
           formdata.append("street", values.street);
@@ -124,8 +134,8 @@ const CompleteProfile = () => {
             );
             if (response.data.success) {
               SuccessToast("Personal Profile Completed Successfully.");
-              isSocialLogin && localStorage.setItem("phone", phone);
-              isSocialLogin
+              hasSociallyLoggedIn && localStorage.setItem("phone", phone);
+              hasSociallyLoggedIn
                 ? navigate("/verify-otp-phone")
                 : navigate("/upload-vehicle-images");
             }
@@ -475,7 +485,7 @@ const CompleteProfile = () => {
                         ) : null}
                       </div>
 
-                      {isSocialLogin ? (
+                      {hasSociallyLoggedIn ? (
                         <>
                           <div>
                             <div class="relative flex   border-2 border-gray-200 focus:border-[#c00000] rounded-lg outline-none items-center ">

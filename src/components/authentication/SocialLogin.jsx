@@ -46,6 +46,7 @@ const SocialLogin = () => {
             if (response?.data?.success) {
               Cookies.set("token", response?.data?.token);
               setIsSocialLogin(true);
+              localStorage.setItem("isSocial", "yes");
               navigate("/complete-profile");
             }
           } catch (error) {
@@ -88,6 +89,7 @@ const SocialLogin = () => {
             if (response?.data?.success) {
               Cookies.set("token", response?.data?.token);
               setIsSocialLogin(true);
+              localStorage.setItem("isSocial", "yes");
               navigate("/complete-profile");
             }
           } catch (error) {
@@ -130,6 +132,7 @@ const SocialLogin = () => {
             if (response?.data?.success) {
               Cookies.set("token", response?.data?.token);
               setIsSocialLogin(true);
+              localStorage.setItem("isSocial", "yes");
               navigate("/complete-profile");
             }
           } catch (error) {
