@@ -21,6 +21,11 @@ const CompleteProfile = () => {
   const navigate = useNavigate();
   const { isSocialLogin } = useContext(AppContext);
 
+  const validPhone = (input) => {
+    const isValidUSNumber = /^[2-9]\d{2}[2-9]\d{2}\d{4}$/.test(input);
+    return isValidUSNumber;
+  };
+
   const [hasSociallyLoggedIn, setHasSociallyLoggedIn] = useState(false);
   useEffect(() => {
     setHasSociallyLoggedIn(
@@ -104,6 +109,10 @@ const CompleteProfile = () => {
         setLoading(true);
         if (hasSociallyLoggedIn && phone == "") {
           setPhoneError("Please provide a valid phone number.");
+
+          setLoading(false);
+        } else if (!validPhone(phone)) {
+          setPhoneError("Phone number is not valid.");
           setLoading(false);
         } else {
           const formdata = new FormData();
@@ -115,7 +124,7 @@ const CompleteProfile = () => {
           formdata.append("gender", values.gender);
           formdata.append("SSN", values.SSN);
           formdata.append("driverLicenseNumber", values.driverLicenseNumber);
-          hasSociallyLoggedIn && formdata.append("phoneNo", phone);
+          hasSociallyLoggedIn && formdata.append("phoneNo", `+1${phone}`);
           hasSociallyLoggedIn &&
             referal !== "" &&
             formdata.append("referalCode", referal);
@@ -134,7 +143,8 @@ const CompleteProfile = () => {
             );
             if (response.data.success) {
               SuccessToast("Personal Profile Completed Successfully.");
-              hasSociallyLoggedIn && localStorage.setItem("phone", phone);
+              hasSociallyLoggedIn &&
+                localStorage.setItem("phone", `+1${phone}`);
               hasSociallyLoggedIn
                 ? navigate("/verify-otp-phone")
                 : navigate("/upload-vehicle-images");
@@ -174,6 +184,23 @@ const CompleteProfile = () => {
     const day = eighteenYearsAgo.getDate().toString().padStart(2, "0");
     return `${year}-${month}-${day}`;
   }
+
+  const handlePhoneChange = (e) => {
+    let input = e.target.value.replace(/\D/g, ""); // Remove any non-numeric characters
+
+    // Ensure input is at most 10 digits long
+    input = input.slice(0, 10);
+
+    const isValidUSNumber = /^[2-9]\d{2}[2-9]\d{2}\d{4}$/.test(input);
+
+    if (isValidUSNumber) {
+      setPhoneError(false);
+      setPhone(`${input}`); // Add +1 automatically if valid
+    } else {
+      setPhone(input);
+      setPhoneError("Phone number must be valid"); // show error
+    }
+  };
   return (
     <div class="w-full  bg-white">
       <div class="grid lg:grid-cols-4 md:grid-cols-3 items-center">
@@ -500,16 +527,15 @@ const CompleteProfile = () => {
                                 id="phoneNo"
                                 name="phoneNo"
                                 maxLength={10}
-                                value={values.phoneNo}
-                                onChange={handleChange}
-                                onBlur={handleBlur}
+                                value={phone}
+                                onChange={(e) => handlePhoneChange(e)}
                                 placeholder="Phone Number (without +1 & dashes)"
                                 class="px-4 py-3.5 bg-white w-[90%] text-sm rounded-lg outline-none"
                               />
                             </div>
-                            {errors.phoneNo && touched.phoneNo ? (
+                            {phoneError ? (
                               <p className="text-red-700 ml-1 mt-1 text-sm font-medium">
-                                {errors.phoneNo}
+                                {phoneError}
                               </p>
                             ) : null}
                           </div>
