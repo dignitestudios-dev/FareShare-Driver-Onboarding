@@ -48,7 +48,12 @@ const VerifyOtpEmail = () => {
                 }
               })
               .catch((error) => {
-                ErrorToast(error?.response?.data?.message);
+                ErrorToast(
+                  error?.response?.data?.message ||
+                    "Invalid Phone number provided. Please resignup."
+                );
+                Cookies.remove("token");
+                navigate("/signup");
               });
           }
         } catch (error) {

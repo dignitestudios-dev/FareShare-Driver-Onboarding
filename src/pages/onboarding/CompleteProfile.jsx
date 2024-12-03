@@ -478,7 +478,7 @@ const CompleteProfile = () => {
                       {isSocialLogin ? (
                         <>
                           <div>
-                            <div class="relative flex  border-2 border-gray-200 focus:border-[#c00000] rounded-lg outline-none items-center mt-8">
+                            <div class="relative flex col-span-2  border-2 border-gray-200 focus:border-[#c00000] rounded-lg outline-none items-center mt-8">
                               <label class="text-gray-800 text-[13px] bg-white absolute px-2 top-[-9px] left-[18px] font-semibold">
                                 Phone Number
                               </label>
