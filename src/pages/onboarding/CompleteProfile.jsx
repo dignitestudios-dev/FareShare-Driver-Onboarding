@@ -456,7 +456,7 @@ const CompleteProfile = () => {
                       ) : null}
                     </div>
 
-                    <div className="w-full grid grid-cols-2 gap-2">
+                    <div className="w-full grid grid-cols-2 gap-x-2 gap-y-4">
                       <div>
                         <div class="relative flex items-center">
                           <label class="text-gray-800 text-[13px] bg-white absolute px-2 top-[-9px] left-[18px] font-semibold">
