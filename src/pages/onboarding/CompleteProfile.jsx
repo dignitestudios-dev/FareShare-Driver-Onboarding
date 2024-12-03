@@ -11,11 +11,11 @@ import { GoPlus } from "react-icons/go";
 import { FaCircleCheck } from "react-icons/fa6";
 import { IoMdClose } from "react-icons/io";
 import { AppContext } from "../../context/AppContext";
-import { completeProfileValues } from "../../../../driver/src/data/profile/completeProfile";
-import { completeProfileSchema } from "../../../../driver/src/schema/profile/completeProfileSchema";
 import { ErrorToast, SuccessToast } from "../../components/global/Toast";
 import { HiOutlineMapPin } from "react-icons/hi2";
 import { data } from "../../constants/cities";
+import { completeProfileValues } from "../../data/profile/completeProfile";
+import { completeProfileSchema } from "../../schema/profile/completeProfileSchema";
 
 const CompleteProfile = () => {
   const navigate = useNavigate();
