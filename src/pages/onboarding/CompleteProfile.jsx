@@ -546,7 +546,7 @@ const CompleteProfile = () => {
                       <div>
                         <div class="relative flex items-center">
                           <label class="text-gray-800 text-[13px] bg-white absolute px-2 top-[-9px] left-[18px] font-semibold">
-                            Driver License Number
+                            License Number
                           </label>
                           <input
                             type="text"
