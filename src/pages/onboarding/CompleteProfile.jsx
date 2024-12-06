@@ -106,12 +106,13 @@ const CompleteProfile = () => {
       validateOnBlur: false,
 
       onSubmit: async (values, action) => {
+        console.log("test", hasSociallyLoggedIn);
         setLoading(true);
         if (hasSociallyLoggedIn && phone == "") {
           setPhoneError("Please provide a valid phone number.");
 
           setLoading(false);
-        } else if (!validPhone(phone)) {
+        } else if (hasSociallyLoggedIn && phone !== "" && !validPhone(phone)) {
           setPhoneError("Phone number is not valid.");
           setLoading(false);
         } else {
@@ -201,6 +202,7 @@ const CompleteProfile = () => {
       setPhoneError("Phone number must be valid"); // show error
     }
   };
+
   return (
     <div class="w-full  bg-white">
       <div class="grid lg:grid-cols-4 md:grid-cols-3 items-center">
@@ -702,6 +704,7 @@ const CompleteProfile = () => {
                             value={values.zipCode}
                             onChange={handleChange}
                             onBlur={handleBlur}
+                            maxLength={5}
                             placeholder="XXXXX"
                             class="px-4 py-3.5 bg-white w-full text-sm border-2 border-gray-200 focus:border-[#c00000] rounded-lg outline-none"
                           />
