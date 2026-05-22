@@ -30,7 +30,71 @@ const UploadVehicleImages = () => {
     vehicleImageInteriorFront: null,
     vehicleImageInteriorBack: null,
   });
+  const videoRef = useRef(null);
+  const canvasRef = useRef(null);
 
+  const [cameraOpen, setCameraOpen] = useState(false);
+  const [currentImageKey, setCurrentImageKey] = useState(null);
+  const [stream, setStream] = useState(null);
+  const openCamera = async (imageKey) => {
+    try {
+      const mediaStream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: "environment",
+        },
+      });
+
+      setStream(mediaStream);
+      setCurrentImageKey(imageKey);
+      setCameraOpen(true);
+
+      setTimeout(() => {
+        if (videoRef.current) {
+          videoRef.current.srcObject = mediaStream;
+        }
+      }, 100);
+    } catch (error) {
+      console.log(error);
+      ErrorToast("Camera access denied.");
+    }
+  };
+
+  const captureImage = () => {
+    const canvas = canvasRef.current;
+    const video = videoRef.current;
+
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(video, 0, 0);
+
+    canvas.toBlob((blob) => {
+      const file = new File([blob], `${currentImageKey}.png`, {
+        type: "image/png",
+      });
+
+      const imageUrl = URL.createObjectURL(blob);
+
+      setImagePreviews((prev) => ({
+        ...prev,
+        [currentImageKey]: imageUrl,
+      }));
+
+      setImageFiles((prev) => ({
+        ...prev,
+        [currentImageKey]: file,
+      }));
+
+      // FORMIK VALUE SET
+      setFieldValue(currentImageKey, file);
+    }, "image/png");
+
+    // Stop Camera
+    stream.getTracks().forEach((track) => track.stop());
+
+    setCameraOpen(false);
+  };
   // Handle image changes, previews, and files
   const handleImageChange = (e, key) => {
     const file = e.target.files[0];
@@ -51,7 +115,14 @@ const UploadVehicleImages = () => {
   };
 
   // Initialize formik for form handling
-  const { handleBlur, handleChange, handleSubmit, errors, touched } = useFormik(
+  const {
+    handleBlur,
+    handleChange,
+    handleSubmit,
+    errors,
+    touched,
+    setFieldValue,
+  } = useFormik(
     {
       initialValues: vehicleImagesValues,
       validationSchema: vehicleImagesSchema,
@@ -126,14 +197,8 @@ const UploadVehicleImages = () => {
                     >
                       <button
                         type="button"
-                        onClick={() => {
-                          if (
-                            !buttonRef[imageKey]?.current?.contains(e.target)
-                          ) {
-                            document.getElementById(imageKey).click();
-                          }
-                        }}
-                        className="w-full h-[136px] bg-white rounded-lg border-2  border-gray-200 text-gray-500 flex gap-1 flex-col justify-center items-center text-2xl font-medium"
+                        onClick={() => openCamera(imageKey)}
+                        className="w-full h-[136px] bg-white rounded-lg border-2 border-gray-200 text-gray-500 flex gap-1 flex-col justify-center items-center text-2xl font-medium"
                       >
                         {imagePreviews[imageKey] ? (
                           <>
@@ -163,18 +228,37 @@ const UploadVehicleImages = () => {
                           </>
                         )}
                       </button>
-                      <input
-                        type="file"
-                        id={imageKey}
-                        name={imageKey}
-                        accept="image/*"
-                        className="hidden"
-                        onChange={(e) => {
-                          handleImageChange(e, imageKey);
-                          handleChange(e);
-                        }}
-                        onBlur={handleBlur}
-                      />
+                      {cameraOpen && (
+                        <div className="fixed inset-0 bg-black z-50 flex flex-col items-center justify-center p-4">
+                          <video
+                            ref={videoRef}
+                            autoPlay
+                            playsInline
+                            className="w-full max-w-md rounded-lg"
+                          />
+
+                          <button
+                            type="button"
+                            onClick={captureImage}
+                            className="mt-4 bg-[#c00000] text-white px-6 py-3 rounded-full"
+                          >
+                            Capture Image
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => {
+                              stream.getTracks().forEach((track) => track.stop());
+                              setCameraOpen(false);
+                            }}
+                            className="mt-2 text-white"
+                          >
+                            Cancel
+                          </button>
+
+                          <canvas ref={canvasRef} className="hidden" />
+                        </div>
+                      )}
                       {errors[imageKey] && touched[imageKey] && (
                         <p className="text-red-700 text-sm ml-1 font-medium">
                           {errors[imageKey]}
