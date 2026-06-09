@@ -16,7 +16,7 @@ import { HiOutlineMapPin } from "react-icons/hi2";
 import { data } from "../../constants/cities";
 import { completeProfileValues } from "../../data/profile/completeProfile";
 import { completeProfileSchema } from "../../schema/profile/completeProfileSchema";
-
+import imageCompression from "browser-image-compression";
 const CompleteProfile = () => {
   const navigate = useNavigate();
   const { isSocialLogin } = useContext(AppContext);
@@ -42,20 +42,65 @@ const CompleteProfile = () => {
   const [phoneError, setPhoneError] = useState(false);
   const [referal, setReferal] = useState("");
   const [referalError, setReferalError] = useState(false);
-
-  const handleProfileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setProfileBase(reader.result);
-      };
-      reader.readAsDataURL(file);
-      setProfilePicture(file);
-    }
-  };
   const [social, setSocial] = useState(null);
   const [socialBase, setSocialBase] = useState(null);
+  const [socialBack, setSocialBack] = useState(null);
+  const [socialBackBase, setSocialBackBase] = useState(null);
+  // const handleProfileChange = (e) => {
+  //   const file = e.target.files[0];
+  //   if (file) {
+  //     const reader = new FileReader();
+  //     reader.onloadend = () => {
+  //       setProfileBase(reader.result);
+  //     };
+  //     reader.readAsDataURL(file);
+  //     setProfilePicture(file);
+  //   }
+  // };
+
+  // const handleProfileChange = (e) => {
+  //   const file = e.target.files[0];
+  //   if (file) {
+  //     const url = URL.createObjectURL(file);
+  //     setProfileBase(url);
+  //     setProfilePicture(file);
+  //   }
+  // };
+  const handleProfileChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    console.log("Original size:", file.size / 1024);
+
+    // skip compression for very small files
+    if (file.size < 150 * 1024) {
+      const url = URL.createObjectURL(file);
+      setProfileBase(url);
+      setProfilePicture(file);
+      return;
+    }
+
+    const compressedFile = await imageCompression(file, {
+      maxSizeMB: 0.2,
+      maxWidthOrHeight: 800,
+      useWebWorker: true,
+    });
+
+    console.log("Compressed size:", compressedFile.size / 1024);
+
+    const url = URL.createObjectURL(compressedFile);
+    setProfileBase(url);
+    setProfilePicture(compressedFile);
+  };
+  useEffect(() => {
+    return () => {
+      if (profileBase) URL.revokeObjectURL(profileBase);
+      if (socialBase) URL.revokeObjectURL(socialBase);
+      if (socialBackBase) URL.revokeObjectURL(socialBackBase);
+    };
+  }, [profileBase, socialBase, socialBackBase]);
+
+
   const handleSocialFrontClick = (e) => {
     e.preventDefault();
     document.getElementById("socialSecurityCardFront").click();
@@ -73,8 +118,6 @@ const CompleteProfile = () => {
     }
   };
 
-  const [socialBack, setSocialBack] = useState(null);
-  const [socialBackBase, setSocialBackBase] = useState(null);
   const handleSocialBackClick = (e) => {
     e.preventDefault();
     document.getElementById("socialSecurityCardBack").click();
@@ -106,7 +149,7 @@ const CompleteProfile = () => {
       validateOnBlur: false,
 
       onSubmit: async (values, action) => {
-        console.log("test", hasSociallyLoggedIn);
+
         setLoading(true);
         if (hasSociallyLoggedIn && phone == "") {
           setPhoneError("Please provide a valid phone number.");
@@ -231,11 +274,10 @@ const CompleteProfile = () => {
                       <button
                         type="button"
                         onClick={handleProfileClick}
-                        className={`w-[100px]  h-[100px] relative rounded-lg bg-white border-2  text-gray-500 flex justify-center items-center text-2xl font-medium transition-all duration-500 ${
-                          touched.profilePicture && errors.profilePicture
-                            ? "border-[#c00000] shake"
-                            : "border-gray-200"
-                        }`}
+                        className={`w-[100px]  h-[100px] relative rounded-lg bg-white border-2  text-gray-500 flex justify-center items-center text-2xl font-medium transition-all duration-500 ${touched.profilePicture && errors.profilePicture
+                          ? "border-[#c00000] shake"
+                          : "border-gray-200"
+                          }`}
                       >
                         {profileBase ? (
                           <img
@@ -592,7 +634,7 @@ const CompleteProfile = () => {
                           </span>
                         </div>
                         {errors.driverLicenseNumber &&
-                        touched.driverLicenseNumber ? (
+                          touched.driverLicenseNumber ? (
                           <p className="text-red-700 ml-1 mt-1 text-sm font-medium">
                             {errors.driverLicenseNumber}
                           </p>
@@ -785,7 +827,7 @@ const CompleteProfile = () => {
                           )}
                         </div>
                         {errors.socialSecurityCardFront &&
-                        touched.socialSecurityCardFront ? (
+                          touched.socialSecurityCardFront ? (
                           <p className="text-red-700 text-sm ml-1 font-medium">
                             {errors.socialSecurityCardFront}
                           </p>
@@ -854,7 +896,7 @@ const CompleteProfile = () => {
                           )}
                         </div>
                         {errors.socialSecurityCardBack &&
-                        touched.socialSecurityCardBack ? (
+                          touched.socialSecurityCardBack ? (
                           <p className="text-red-700 text-sm ml-1 font-medium">
                             {errors.socialSecurityCardBack}
                           </p>

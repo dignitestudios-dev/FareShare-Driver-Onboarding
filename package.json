@@ -12,6 +12,7 @@
   "dependencies": {
     "@stripe/react-stripe-js": "^3.0.0",
     "axios": "^1.7.8",
+    "browser-image-compression": "^2.0.2",
     "firebase": "^11.0.2",
     "formik": "^2.4.6",
     "js-cookie": "^3.0.5",
