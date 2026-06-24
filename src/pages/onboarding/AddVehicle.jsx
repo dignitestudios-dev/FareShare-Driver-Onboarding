@@ -173,21 +173,21 @@ const AddVehicle = () => {
     return `${year}-${month}-${day}`;
   }
 
-  useEffect(() => {
-    const token = Cookies.get("token");
-    const vehicleId = localStorage.getItem("vehicle_id");
-    if (token && vehicleId) {
-      return;
-    } else if (!vehicleId) {
-      ErrorToast("Vehicle Id not found. Please re-signup.");
-      navigate("/signup");
-    } else if (token == null) {
-      ErrorToast("Session expired, Please relogin");
-      navigate("/signup");
-    } else {
-      return;
-    }
-  }, []);
+  // useEffect(() => {
+  //   const token = Cookies.get("token");
+  //   const vehicleId = localStorage.getItem("vehicle_id");
+  //   if (token && vehicleId) {
+  //     return;
+  //   } else if (!vehicleId) {
+  //     ErrorToast("Vehicle Id not found. Please re-signup.");
+  //     navigate("/signup");
+  //   } else if (token == null) {
+  //     ErrorToast("Session expired, Please relogin");
+  //     navigate("/signup");
+  //   } else {
+  //     return;
+  //   }
+  // }, []);
 
   return (
     <div class="w-full  bg-white">
@@ -396,14 +396,14 @@ const AddVehicle = () => {
                               <>
                                 <FaCircleCheck className="text-green-500" />
                                 <span className="text-[12px] underline underline-offset-2 font-bold text-green-500">
-                                  Document Added
+                                  Added
                                 </span>
                               </>
                             ) : (
                               <>
                                 <AiOutlinePlusCircle />
                                 <span className="text-[12px] underline underline-offset-2 font-bold text-black">
-                                  Add Documents
+                                  Add
                                 </span>
                               </>
                             )}
@@ -429,6 +429,7 @@ const AddVehicle = () => {
                             name="driverLicenseCardFront"
                             accept="image/*"
                             className="hidden"
+                            capture="environment"
                             onBlur={handleBlur}
                             onChange={(e) => {
                               handleLicenseFrontChange(e);
@@ -437,7 +438,7 @@ const AddVehicle = () => {
                           />
                         </div>
                         {errors.driverLicenseCardFront &&
-                        touched.driverLicenseCardFront ? (
+                          touched.driverLicenseCardFront ? (
                           <p className="text-red-700 text-sm ml-1 font-medium">
                             {errors.driverLicenseCardFront}
                           </p>
@@ -478,14 +479,14 @@ const AddVehicle = () => {
                               <>
                                 <FaCircleCheck className="text-green-500" />
                                 <span className="text-[12px] underline underline-offset-2 font-bold text-green-500">
-                                  Document Added
+                                  Added
                                 </span>
                               </>
                             ) : (
                               <>
                                 <AiOutlinePlusCircle />
                                 <span className="text-[12px]  cursor-pointer underline underline-offset-2 font-bold text-black">
-                                  Add Documents
+                                  Add
                                 </span>
                               </>
                             )}
@@ -496,6 +497,8 @@ const AddVehicle = () => {
                             name="driverLicenseCardBack"
                             accept="image/*"
                             className="hidden"
+                            capture="environment"
+
                             onBlur={handleBlur}
                             onChange={(e) => {
                               handleLicenseBackChange(e);
@@ -504,7 +507,7 @@ const AddVehicle = () => {
                           />
                         </div>
                         {errors.driverLicenseCardBack &&
-                        touched.driverLicenseCardBack ? (
+                          touched.driverLicenseCardBack ? (
                           <p className="text-red-700 text-sm ml-1 font-medium">
                             {errors.driverLicenseCardBack}
                           </p>
@@ -530,7 +533,7 @@ const AddVehicle = () => {
                         />
                       </div>
                       {errors.driverLicenseExpiryDate &&
-                      touched.driverLicenseExpiryDate ? (
+                        touched.driverLicenseExpiryDate ? (
                         <p className="text-red-700 ml-1 mt-1 text-sm font-medium">
                           {errors.driverLicenseExpiryDate}
                         </p>
@@ -562,14 +565,14 @@ const AddVehicle = () => {
                             <>
                               <FaCircleCheck className="text-green-500" />
                               <span className="text-[12px] underline underline-offset-2 font-bold text-green-500">
-                                Document Added
+                                Added
                               </span>
                             </>
                           ) : (
                             <>
                               <AiOutlinePlusCircle />
                               <span className="text-[12px] underline underline-offset-2 font-bold text-black">
-                                Add Documents
+                                Add
                               </span>
                             </>
                           )}
@@ -593,6 +596,8 @@ const AddVehicle = () => {
                           id="proofInsurance"
                           name="proofInsurance"
                           accept="image/*"
+                          capture="environment"
+
                           className="hidden"
                           onBlur={handleBlur}
                           onChange={(e) => {
@@ -626,7 +631,7 @@ const AddVehicle = () => {
                         />
                       </div>
                       {errors.proofInsuranceExpiryDate &&
-                      touched.proofInsuranceExpiryDate ? (
+                        touched.proofInsuranceExpiryDate ? (
                         <p className="text-red-700 ml-1 mt-1 text-sm font-medium">
                           {errors.proofInsuranceExpiryDate}
                         </p>
@@ -646,7 +651,7 @@ const AddVehicle = () => {
                           </span>
                         </div>
                         <span className="text-[12px] font-[510] text-black">
-                          Upload proof of vehicle’s registrations
+                          Registration Sticker Photo (Front Windshield)
                         </span>
 
                         <button
@@ -657,14 +662,14 @@ const AddVehicle = () => {
                             <>
                               <FaCircleCheck className="text-green-500" />
                               <span className="text-[12px] underline underline-offset-2 font-bold text-green-500">
-                                Document Added
+                                Added
                               </span>
                             </>
                           ) : (
                             <>
                               <AiOutlinePlusCircle />
                               <span className="text-[12px] underline underline-offset-2 font-bold text-black">
-                                Add Documents
+                                Add
                               </span>
                             </>
                           )}
@@ -689,6 +694,8 @@ const AddVehicle = () => {
                           id="vehicleRegistrationCard"
                           name="vehicleRegistrationCard"
                           accept="image/*"
+                          capture="environment"
+
                           className="hidden"
                           onBlur={handleBlur}
                           onChange={(e) => {
@@ -698,7 +705,7 @@ const AddVehicle = () => {
                         />
                       </div>
                       {errors.vehicleRegistrationCard &&
-                      touched.vehicleRegistrationCard ? (
+                        touched.vehicleRegistrationCard ? (
                         <p className="text-red-700 text-sm ml-1 font-medium">
                           {errors.vehicleRegistrationCard}
                         </p>
@@ -723,7 +730,7 @@ const AddVehicle = () => {
                         />
                       </div>
                       {errors.vehicleRegistrationExpiryDate &&
-                      touched.vehicleRegistrationExpiryDate ? (
+                        touched.vehicleRegistrationExpiryDate ? (
                         <p className="text-red-700 ml-1 mt-1 text-sm font-medium">
                           {errors.vehicleRegistrationExpiryDate}
                         </p>
