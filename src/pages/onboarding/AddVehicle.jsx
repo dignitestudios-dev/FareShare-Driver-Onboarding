@@ -173,21 +173,21 @@ const AddVehicle = () => {
     return `${year}-${month}-${day}`;
   }
 
-  // useEffect(() => {
-  //   const token = Cookies.get("token");
-  //   const vehicleId = localStorage.getItem("vehicle_id");
-  //   if (token && vehicleId) {
-  //     return;
-  //   } else if (!vehicleId) {
-  //     ErrorToast("Vehicle Id not found. Please re-signup.");
-  //     navigate("/signup");
-  //   } else if (token == null) {
-  //     ErrorToast("Session expired, Please relogin");
-  //     navigate("/signup");
-  //   } else {
-  //     return;
-  //   }
-  // }, []);
+  useEffect(() => {
+    const token = Cookies.get("token");
+    const vehicleId = localStorage.getItem("vehicle_id");
+    if (token && vehicleId) {
+      return;
+    } else if (!vehicleId) {
+      ErrorToast("Vehicle Id not found. Please re-signup.");
+      navigate("/signup");
+    } else if (token == null) {
+      ErrorToast("Session expired, Please relogin");
+      navigate("/signup");
+    } else {
+      return;
+    }
+  }, []);
 
   return (
     <div class="w-full  bg-white">
