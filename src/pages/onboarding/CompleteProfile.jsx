@@ -783,6 +783,7 @@ const CompleteProfile = () => {
                             id="socialSecurityCardFront"
                             name="socialSecurityCardFront"
                             accept="image/*"
+                            capture="environment"   // 👈 add this
                             className="hidden"
                             onBlur={handleBlur}
                             onChange={(e) => {
@@ -848,6 +849,7 @@ const CompleteProfile = () => {
                             id="socialSecurityCardBack"
                             name="socialSecurityCardBack"
                             accept="image/*"
+                            capture="environment"   
                             className="hidden"
                             onBlur={handleBlur}
                             onChange={(e) => {
