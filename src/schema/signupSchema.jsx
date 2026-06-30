@@ -15,7 +15,7 @@ export const signupSchema = Yup.object({
       "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character"
     )
     .required("Please enter your password"),
-  referalCode: Yup.string().min(4).max(4),
+  referalCode: Yup.string().min(6).max(6),
   confirmPassword: Yup.string()
     .oneOf([Yup.ref("password"), null], "Passwords must match")
     .required("Please confirm your password"),

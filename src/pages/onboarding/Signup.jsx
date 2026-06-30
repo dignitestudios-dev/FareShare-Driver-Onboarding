@@ -216,7 +216,7 @@ const Signup = () => {
                   value={values.referalCode}
                   onChange={handleChange}
                   onBlur={handleBlur}
-                  placeholder="4-Digit Referral Code"
+                  placeholder="6-Digit Referral Code"
                   class="px-4 py-3.5 bg-white w-full text-sm border-2 border-gray-200 focus:border-[#c00000] rounded-lg outline-none"
                 />
                 <span className="absolute right-4 text-gray-400">%</span>
